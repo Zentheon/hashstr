@@ -8,4 +8,5 @@ members = [
     "md2-strings",
     "md4-strings",
     "md5-strings",
+    "ripemd-strings",
 ]

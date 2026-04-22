@@ -240,6 +240,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "ripemd"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4dd4211456b4172d7e44261920c25acf07367c4f04bb5f5d54fc21b090d9b159"
+dependencies = [
+ "digest",
+]
+
+[[package]]
+name = "ripemd-strings"
+version = "0.1.0"
+dependencies = [
+ "base16ct",
+ "digest",
+ "digest-io",
+ "hash-strings-derive",
+ "ripemd",
+ "serde",
+ "tracing",
+]
+
+[[package]]
 name = "serde"
 version = "1.0.228"
 source = "registry+https://github.com/rust-lang/crates.io-index"
