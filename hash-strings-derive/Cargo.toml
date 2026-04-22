@@ -1,0 +1,19 @@
+[package]
+authors = ["Zentheon <zentheon@mailbox.org>"]
+edition = "2024"
+name = "hash-strings-derive"
+description = "Derive macro magic behind the hash-strings crates"
+version = "0.1.0"
+readme = "../README.md"
+repository = "https://github.com/Zentheon/hash-strings"
+homepage = "https://github.com/Zentheon/hash-strings"
+license-file = "../LICENSE"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+quote = "1.0"
+syn = { version = "2.0", features = ["full"] }
+proc-macro2 = "1.0"
+darling = "0.23.0"

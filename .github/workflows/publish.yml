@@ -1,0 +1,65 @@
+name: Publish
+
+# TODO: Figure out how to IO built packages.
+
+# This workflow has two jobs:
+# crates-publish:
+#   Publish the crate to crates.io and creates a build artifact for github-publish
+#
+# github-publish:
+#   Fetches build-artifact and checks out CHANGELOG.md. Retrieves the changelog section relating to
+#   the pushed tag and creates a new release with those inputs.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  crates-publish:
+    name: Build, test and publish package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          override: true
+
+      - uses: katyo/publish-crates@v2
+        with:
+          args: '--manifest-path ./crate/Cargo.toml'
+          registry-token: ${{ secrets.CRATES_IO_TOKEN }}
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifact
+          path: |
+            CHANGELOG.md
+
+  github-release:
+    needs: crates-publish
+    runs-on: ubuntu-latest
+    name: Create Github release
+    permissions:
+      contents: write
+    steps:
+      - name: Retrieve built package
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifact
+
+      - name: Extract changelog to body file
+        run: |
+          awk '/^## ${{ github.ref_name }}/ {flag=1; next} /^- - -/ {flag=0} flag' CHANGELOG.md > release_body.md
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: release_body.md
+          files: |
+            CHANGELOG.md

@@ -1,0 +1,7 @@
+target
+result
+result-lib
+.direnv
+.devenv*
+
+.pre-commit-config.yaml
