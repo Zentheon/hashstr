@@ -4,9 +4,8 @@ use quote::{ToTokens, quote};
 use syn::Ident;
 
 #[derive(Debug, FromMeta)]
-// #[darling(default)]
 pub struct StructAttr {
-    hasher: Ident,
+    hasher: Option<Ident>,
     con: Ident,
 }
 
@@ -16,7 +15,7 @@ pub struct StructAttr {
     supports(struct_any),
     // forward_attrs(allow, doc, cfg)
 )]
-pub struct HashStringRec {
+pub struct StringWrapperRec {
     ident: syn::Ident,
     // generics: syn::Generics,
     // data: ast::Data<(), FieldRec>,
@@ -24,9 +23,9 @@ pub struct HashStringRec {
     attr: StructAttr,
 }
 
-impl ToTokens for HashStringRec {
+impl ToTokens for StringWrapperRec {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        let HashStringRec {
+        let StringWrapperRec {
             ref ident,
             // ref generics,
             // ref data,
@@ -34,18 +33,12 @@ impl ToTokens for HashStringRec {
         } = *self;
 
         let ident_str = ident.to_string();
-        let hasher = attr.hasher.clone();
+        let _hasher = attr.hasher.clone();
         let con = attr.con.clone();
 
         // let (imp, ty, wher) = generics.split_for_impl();
 
         tokens.extend(quote! {
-            impl Default for #ident {
-                fn default() -> Self {
-                    Self::digest([])
-                }
-            }
-
             impl std::ops::Deref for #ident {
                 type Target = String;
 
@@ -121,7 +114,7 @@ impl ToTokens for HashStringRec {
 
             impl From<&digest::array::Array<u8, #con>> for #ident {
                 fn from(digest: &digest::array::Array<u8, #con>) -> Self {
-                    base16ct::lower::encode_string(digest).try_into().unwrap()
+                    Self(base16ct::lower::encode_string(digest))
                 }
             }
 
@@ -198,51 +191,6 @@ impl ToTokens for HashStringRec {
                 }
                 pub fn to_string(&self) -> String {
                     self.0.clone()
-                }
-                /// Digest some raw data and produce a hash.
-                pub fn digest(vec: impl AsRef<[u8]>) -> Self {
-                    use digest::Digest;
-
-                    let hash = #hasher::digest(vec).into();
-
-                    #[cfg(feature = "tracing")]
-                    tracing::trace!(%hash, "Generated the hash of a bytes vec");
-                    hash
-                }
-                /// Attempts to digest the entirety of the given reader.
-                ///
-                /// Returns errors produced by [`std::io::copy`]
-                pub fn digest_reader<R>(read: &mut R) -> Result<Self, std::io::Error>
-                where
-                    R: Sized,
-                    R: std::io::Read,
-                {
-                    use digest::Digest;
-
-                    let mut hasher = digest_io::IoWrapper(#hasher::new());
-                    let digested = std::io::copy(read, &mut hasher)?;
-                    let hash = Self::from(hasher.0.finalize());
-
-                    #[cfg(feature = "tracing")]
-                    tracing::trace!(digested, %hash, "Generated the hash of content in a reader");
-
-                    Ok(hash)
-                }
-                /// Attempts to open the given path and digest the entirety of its bytes.
-                ///
-                /// Returns errors produced by [`std::fs::File::open`] and [`std::io::copy`]
-                pub fn digest_file(path: impl AsRef<std::path::Path>) -> Result<Self, std::io::Error> {
-                    use digest::Digest;
-
-                    let mut file = std::fs::File::open(path.as_ref())?;
-                    let mut hasher = digest_io::IoWrapper(#hasher::new());
-                    let digested = std::io::copy(&mut file, &mut hasher)?;
-                    let hash = Self::from(hasher.0.finalize());
-
-                    #[cfg(feature = "tracing")]
-                    tracing::trace!(digested, %hash, path = ?path.as_ref(), "Generated the hash of a file");
-
-                    Ok(hash)
                 }
             }
         });
