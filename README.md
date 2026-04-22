@@ -27,3 +27,8 @@ fn default() -> Self {
 }
 ```
 This results in the hash of digesting exactly nothing. In the case of [`sha3::Sha3_256`] specifically: `e3f209a895a66061878916ed4ca48bf2f8e6cf37de93a7d362f4db9b303688e0862d87e701d30b27956969ca6b9be398e889ca6c0bc681108f0d6fb57c2808e5`
+
+# Limitations
+Extendable hashers are currently unsupported. Examples included:
+* [`sha3::Shake128`]
+* [`sha3::Shake256`]

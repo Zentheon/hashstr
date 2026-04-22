@@ -4,4 +4,5 @@ members = [
     "hash-strings-derive",
     "sha1-strings",
     "sha2-strings",
+    "sha3-strings",
 ]
