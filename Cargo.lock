@@ -143,6 +143,73 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "48f5d2a454e16a5ea0f4ced81bd44e4cfc7bd3a507b61887c99fd3538b28e4af"
 
 [[package]]
+name = "md-5"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "69b6441f590336821bb897fb28fc622898ccceb1d6cea3fde5ea86b090c4de98"
+dependencies = [
+ "cfg-if",
+ "digest",
+]
+
+[[package]]
+name = "md2"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1d503fa42a36d0bae709eee924b9531ac3dd5a7f30e47d85185fa7d3ea588a08"
+dependencies = [
+ "digest",
+]
+
+[[package]]
+name = "md2-strings"
+version = "0.1.0"
+dependencies = [
+ "base16ct",
+ "digest",
+ "digest-io",
+ "hash-strings-derive",
+ "md2",
+ "serde",
+ "tracing",
+]
+
+[[package]]
+name = "md4"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bd76fb0fd6b2e4be62a73f8e0858ca97f81babcb1af322dcaca196f735f17f80"
+dependencies = [
+ "digest",
+]
+
+[[package]]
+name = "md4-strings"
+version = "0.1.0"
+dependencies = [
+ "base16ct",
+ "digest",
+ "digest-io",
+ "hash-strings-derive",
+ "md4",
+ "serde",
+ "tracing",
+]
+
+[[package]]
+name = "md5-strings"
+version = "0.1.0"
+dependencies = [
+ "base16ct",
+ "digest",
+ "digest-io",
+ "hash-strings-derive",
+ "md-5",
+ "serde",
+ "tracing",
+]
+
+[[package]]
 name = "once_cell"
 version = "1.21.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"

@@ -5,4 +5,7 @@ members = [
     "sha1-strings",
     "sha2-strings",
     "sha3-strings",
+    "md2-strings",
+    "md4-strings",
+    "md5-strings",
 ]
