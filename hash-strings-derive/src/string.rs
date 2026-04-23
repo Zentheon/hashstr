@@ -92,7 +92,7 @@ impl ToTokens for StringWrapperRec {
             }
 
             impl TryFrom<&str> for #ident {
-                type Error = String;
+                type Error = hash_strings::Error;
 
                 fn try_from(value: &str) -> Result<Self, Self::Error> {
                     Self::try_from(value.to_string())
@@ -100,24 +100,16 @@ impl ToTokens for StringWrapperRec {
             }
 
             impl TryFrom<String> for #ident {
-                type Error = String;
+                type Error = hash_strings::Error;
 
                 fn try_from(value: String) -> Result<Self, Self::Error> {
-                    use digest::typenum::Unsigned;
-
-                    let value_len = value.len();
-                    let expected_len = #con::to_usize() * 2;
-                    if value.len() != expected_len {
-                        return Err(format!("Invalid length of {}. Expected: {expected_len}, got: {value_len}", #hash_name));
-                    } else if !value.chars().all(|c| c.is_digit(16)) {
-                        return Err(format!("Characters in hash should be hexadecimal. Input: {value}"));
-                    }
+                    Self::check_str(&value)?;
                     Ok(Self(value))
                 }
             }
 
             impl std::str::FromStr for #ident {
-                type Err = String;
+                type Err = hash_strings::Error;
 
                 fn from_str(s: &str) -> Result<Self, Self::Err> {
                     Self::try_from(s)
@@ -164,15 +156,12 @@ impl ToTokens for StringWrapperRec {
 
             impl PartialOrd for #ident {
                 fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-                    // We delegate the comparison to the inner String's natural ordering.
                     Some(self.0.cmp(&other.0))
                 }
             }
 
             impl Ord for #ident {
                 fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-                    // Since we implemented PartialOrd correctly by delegating to .cmp(),
-                    // this implementation is straightforward.
                     self.0.cmp(&other.0)
                 }
             }
@@ -200,6 +189,26 @@ impl ToTokens for StringWrapperRec {
             impl #ident {
                 pub fn as_str(&self) -> &str {
                     &self.0
+                }
+                /// Checks a given str against length and hexadecimal constraints of the hash type.
+                pub fn check_str(value: &str) -> Result<(), hash_strings::Error> {
+                    use hash_strings::{Error, LenError, EncodingError};
+                    use digest::typenum::Unsigned;
+
+                    let got = value.len();
+                    let expected = #con::to_usize() * 2;
+                    if got != expected {
+                        return Err(Error::LenError(LenError { got, expected, hash_name: #hash_name.to_string() }));
+                    } else if !value.chars().all(|c| c.is_digit(16)) {
+                        return Err(Error::EncodingError(EncodingError { hash_name: #hash_name.to_string() }));
+                    }
+                    Ok(())
+                }
+                /// Checks the underlying String against length and hexadecimal constraints of the hash type.
+                ///
+                /// Useful for ensuring an instance of Self initialized directly with a String is within bounds.
+                pub fn check(&self) -> Result<(), hash_strings::Error> {
+                    Self::check_str(self)
                 }
             }
         });

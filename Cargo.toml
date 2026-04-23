@@ -1,6 +1,7 @@
 [workspace]
 resolver = "3"
 members = [
+    "hash-strings",
     "hash-strings-derive",
     "sha1-strings",
     "sha1-checked-strings",

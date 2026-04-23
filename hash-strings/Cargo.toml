@@ -1,0 +1,12 @@
+# https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[package]
+authors = ["Zentheon <zentheon@mailbox.org>"]
+edition = "2024"
+name = "hash-strings"
+description = "Convenient string-like types that wrap RustCrypto hashers"
+version = "0.1.0"
+readme = "../README.md"
+repository = "https://github.com/Zentheon/hash-strings"
+homepage = "https://github.com/Zentheon/hash-strings"
+license-file = "../LICENSE"
