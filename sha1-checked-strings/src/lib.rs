@@ -3,7 +3,7 @@ use hash_strings_derive::StringWrapper;
 use sha1_checked::{Sha1, digest::DynDigest};
 
 #[derive(StringWrapper)]
-#[hash_string(con = U20)]
+#[hash_string(hash_name = "Sha1Checked", con = U20)]
 pub struct Sha1CheckedString(pub String);
 
 /// Reimplementation of the [`sha1_checked::CollisionResult`] for [`Sha1CheckedString`]

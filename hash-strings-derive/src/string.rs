@@ -6,6 +6,7 @@ use syn::Ident;
 #[derive(Debug, FromMeta)]
 pub struct StructAttr {
     hasher: Option<Ident>,
+    hash_name: Option<String>,
     con: Ident,
 }
 
@@ -33,7 +34,14 @@ impl ToTokens for StringWrapperRec {
         } = *self;
 
         let ident_str = ident.to_string();
-        let _hasher = attr.hasher.clone();
+        let hasher = attr.hasher.clone();
+        let hash_name = if let Some(name) = &attr.hash_name {
+            name.to_string()
+        } else {
+            hasher
+                .expect("Either hasher or hash_name attribute must be set")
+                .to_string()
+        };
         let con = attr.con.clone();
 
         // let (imp, ty, wher) = generics.split_for_impl();
@@ -87,14 +95,7 @@ impl ToTokens for StringWrapperRec {
                 type Error = String;
 
                 fn try_from(value: &str) -> Result<Self, Self::Error> {
-                    use digest::typenum::Unsigned;
-
-                    if value.len() != #con::to_usize() * 2 {
-                        return Err("Invalid length of hash".to_string());
-                    } else if !value.chars().all(|c| c.is_digit(16)) {
-                        return Err("Characters in hash should be hexadecimal".to_string());
-                    }
-                    Ok(Self(value.to_string()))
+                    Self::try_from(value.to_string())
                 }
             }
 
@@ -102,7 +103,16 @@ impl ToTokens for StringWrapperRec {
                 type Error = String;
 
                 fn try_from(value: String) -> Result<Self, Self::Error> {
-                    Self::try_from(value.as_str())
+                    use digest::typenum::Unsigned;
+
+                    let value_len = value.len();
+                    let expected_len = #con::to_usize() * 2;
+                    if value.len() != expected_len {
+                        return Err(format!("Invalid length of {}. Expected: {expected_len}, got: {value_len}", #hash_name));
+                    } else if !value.chars().all(|c| c.is_digit(16)) {
+                        return Err(format!("Characters in hash should be hexadecimal. Input: {value}"));
+                    }
+                    Ok(Self(value))
                 }
             }
 
@@ -190,9 +200,6 @@ impl ToTokens for StringWrapperRec {
             impl #ident {
                 pub fn as_str(&self) -> &str {
                     &self.0
-                }
-                pub fn to_string(&self) -> String {
-                    self.0.clone()
                 }
             }
         });

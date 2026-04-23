@@ -6,6 +6,7 @@ use syn::Ident;
 #[derive(Debug, FromMeta)]
 pub struct StructAttr {
     hasher: Ident,
+    hash_name: Option<String>,
     con: Option<Ident>,
 }
 
@@ -33,6 +34,7 @@ impl ToTokens for StringDigestRec {
         } = *self;
 
         let hasher = attr.hasher.clone();
+        let _hash_name = attr.hash_name.clone();
         let _con = attr.con.clone();
 
         // let (imp, ty, wher) = generics.split_for_impl();
