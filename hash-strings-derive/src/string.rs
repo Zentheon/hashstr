@@ -87,7 +87,9 @@ impl ToTokens for StringWrapperRec {
                 type Error = String;
 
                 fn try_from(value: &str) -> Result<Self, Self::Error> {
-                    if value.len() != 40 {
+                    use digest::typenum::Unsigned;
+
+                    if value.len() != #con::to_usize() * 2 {
                         return Err("Invalid length of hash".to_string());
                     } else if !value.chars().all(|c| c.is_digit(16)) {
                         return Err("Characters in hash should be hexadecimal".to_string());
