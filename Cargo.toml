@@ -3,14 +3,4 @@ resolver = "3"
 members = [
     "hash-strings",
     "hash-strings-derive",
-    "sha1-strings",
-    "sha1-checked-strings",
-    "sha2-strings",
-    "sha3-strings",
-    "md2-strings",
-    "md4-strings",
-    "md5-strings",
-    "ripemd-strings",
-    "blake2-strings",
-    "blake3-strings",
 ]

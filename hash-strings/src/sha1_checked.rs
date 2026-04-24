@@ -1,3 +1,4 @@
+use crate::{EncodingError, Error};
 use digest::{consts::U20, typenum::Unsigned};
 use fstr::FStr;
 use hash_strings_derive::StringWrapper;

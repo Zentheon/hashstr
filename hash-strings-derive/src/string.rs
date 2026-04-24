@@ -82,7 +82,7 @@ impl ToTokens for StringWrapperRec {
             }
 
             impl TryFrom<&str> for #ident {
-                type Error = hash_strings::Error;
+                type Error = Error;
 
                 fn try_from(value: &str) -> Result<Self, Self::Error> {
                     Self::try_from(value.to_string())
@@ -90,7 +90,7 @@ impl ToTokens for StringWrapperRec {
             }
 
             impl TryFrom<String> for #ident {
-                type Error = hash_strings::Error;
+                type Error = Error;
 
                 fn try_from(value: String) -> Result<Self, Self::Error> {
                     Self::check_hex(&value)?;
@@ -99,7 +99,7 @@ impl ToTokens for StringWrapperRec {
             }
 
             impl std::str::FromStr for #ident {
-                type Err = hash_strings::Error;
+                type Err = Error;
 
                 fn from_str(s: &str) -> Result<Self, Self::Err> {
                     Self::try_from(s)
@@ -205,9 +205,7 @@ impl ToTokens for StringWrapperRec {
                 pub fn as_str(&self) -> &str {
                     &self.0
                 }
-                fn check_hex(value: &str) -> Result<(), hash_strings::Error> {
-                    use hash_strings::{Error, EncodingError};
-
+                fn check_hex(value: &str) -> Result<(), Error> {
                     if !value.chars().all(|c| c.is_digit(16)) {
                         Err(Error::EncodingError(EncodingError { hash_name: #hash_name.to_string() }))
                     } else {

@@ -1,6 +1,6 @@
+use crate::{EncodingError, Error};
 use blake3::{Hash, Hasher};
 use digest::consts::U16;
-use fstr::FStr;
 use hash_strings_derive::StringWrapper;
 
 #[derive(Clone, Debug, Eq, StringWrapper)]
@@ -14,7 +14,7 @@ impl Default for Blake3String {
 }
 impl From<Hash> for Blake3String {
     fn from(value: Hash) -> Self {
-        Self(FStr::try_from(value.as_bytes()).unwrap())
+        Self(fstr::FStr::try_from(value.as_bytes()).unwrap())
     }
 }
 

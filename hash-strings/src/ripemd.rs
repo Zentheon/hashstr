@@ -1,3 +1,4 @@
+use crate::{EncodingError, Error};
 use digest::consts::{U16, U20, U32, U40};
 use hash_strings_derive::impl_hash_string;
 use ripemd::{Ripemd128, Ripemd160, Ripemd256, Ripemd320};

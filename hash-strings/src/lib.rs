@@ -2,6 +2,27 @@ use std::fmt::Display;
 
 use fstr::LengthError;
 
+#[cfg(feature = "blake2")]
+pub mod blake2;
+#[cfg(feature = "blake3")]
+pub mod blake3;
+#[cfg(feature = "md2")]
+pub mod md2;
+#[cfg(feature = "md4")]
+pub mod md4;
+#[cfg(feature = "md5")]
+pub mod md5;
+#[cfg(feature = "ripemd")]
+pub mod ripemd;
+#[cfg(feature = "sha1")]
+pub mod sha1;
+#[cfg(feature = "sha1-checked")]
+pub mod sha1_checked;
+#[cfg(feature = "sha2")]
+pub mod sha2;
+#[cfg(feature = "sha3")]
+pub mod sha3;
+
 #[derive(Debug, Clone)]
 pub struct LenError {
     pub expected: usize,

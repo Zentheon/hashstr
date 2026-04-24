@@ -1,3 +1,4 @@
+use crate::{EncodingError, Error};
 use blake2::{Blake2b512, Blake2s256, Digest, digest::generic_array::GenericArray};
 use digest::consts::{U32, U64};
 use hash_strings_derive::{StringDigest, StringWrapper};

@@ -1,5 +1,6 @@
 #![doc = include_str!("../../README.md")]
 
+use crate::{EncodingError, Error};
 use digest::consts::{U28, U32, U48, U64, U200};
 use hash_strings_derive::impl_hash_string;
 use sha3::{

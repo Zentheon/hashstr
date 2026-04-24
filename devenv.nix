@@ -2,7 +2,6 @@
 
 {
   packages = [
-    pkgs.openssl
     pkgs.cocogitto
   ];
 
