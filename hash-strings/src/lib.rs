@@ -2,10 +2,16 @@ use std::fmt::Display;
 
 use fstr::LengthError;
 
+#[cfg(feature = "belt-hash")]
+pub mod belt_hash;
 #[cfg(feature = "blake2")]
 pub mod blake2;
 #[cfg(feature = "blake3")]
 pub mod blake3;
+#[cfg(feature = "fsb")]
+pub mod fsb;
+#[cfg(feature = "gost94")]
+pub mod gost94;
 #[cfg(feature = "groestl")]
 pub mod groestl;
 #[cfg(feature = "jh")]
