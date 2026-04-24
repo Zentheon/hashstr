@@ -11,6 +11,13 @@ repository = "https://github.com/Zentheon/hash-strings"
 homepage = "https://github.com/Zentheon/hash-strings"
 license-file = "../LICENSE"
 
+[dev-dependencies]
+criterion = { version = "0.8", features = ["html_reports"] }
+
+[[bench]]
+name = "conversion"
+harness = false
+
 [features]
 default = ["tracing"]
 tracing = ["dep:tracing"]
@@ -18,6 +25,7 @@ tracing = ["dep:tracing"]
 [dependencies]
 hash-strings = { version = "0.1.0", path = "../hash-strings" }
 hash-strings-derive = { path = "../hash-strings-derive" }
+fstr = "0.2.17"
 serde = { version = "1.0.219" }
 tracing = { version = "0.1.41", optional = true }
 digest = "0.11.2"

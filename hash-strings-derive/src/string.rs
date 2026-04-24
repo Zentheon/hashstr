@@ -1,14 +1,9 @@
-use darling::{FromDeriveInput, FromMeta};
+use darling::FromDeriveInput;
+use proc_macro_error::abort;
 use proc_macro2::TokenStream;
 use quote::{ToTokens, quote};
-use syn::Ident;
 
-#[derive(Debug, FromMeta)]
-pub struct StructAttr {
-    hasher: Option<Ident>,
-    hash_name: Option<String>,
-    con: Ident,
-}
+use crate::StructAttr;
 
 #[derive(Debug, FromDeriveInput)]
 #[darling(
@@ -37,10 +32,13 @@ impl ToTokens for StringWrapperRec {
         let hasher = attr.hasher.clone();
         let hash_name = if let Some(name) = &attr.hash_name {
             name.to_string()
+        } else if let Some(name) = hasher {
+            name.to_string()
         } else {
-            hasher
-                .expect("Either hasher or hash_name attribute must be set")
-                .to_string()
+            abort!(
+                attr.hash_name,
+                "Either hasher or hash_name attribute must be set"
+            )
         };
         let con = attr.con.clone();
 
@@ -48,7 +46,10 @@ impl ToTokens for StringWrapperRec {
 
         tokens.extend(quote! {
             impl std::ops::Deref for #ident {
-                type Target = String;
+                type Target = fstr::FStr<{
+                    use digest::typenum::Unsigned;
+                    #con::USIZE * 2
+                }>;
 
                 fn deref(&self) -> &Self::Target {
                     &self.0
@@ -73,21 +74,9 @@ impl ToTokens for StringWrapperRec {
                 }
             }
 
-            impl Clone for #ident {
-                fn clone(&self) -> Self {
-                    Self(self.0.clone())
-                }
-            }
-
-            impl std::fmt::Debug for #ident {
-                fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                    f.debug_tuple(#ident_str).field(&self.0).finish()
-                }
-            }
-
             impl std::fmt::Display for #ident {
                 fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                    write!(f, "{}", self.0)
+                    write!(f, "{}", *self)
                 }
             }
 
@@ -103,8 +92,8 @@ impl ToTokens for StringWrapperRec {
                 type Error = hash_strings::Error;
 
                 fn try_from(value: String) -> Result<Self, Self::Error> {
-                    Self::check_str(&value)?;
-                    Ok(Self(value))
+                    Self::check_hex(&value)?;
+                    Ok(Self(value.parse()?))
                 }
             }
 
@@ -118,7 +107,7 @@ impl ToTokens for StringWrapperRec {
 
             impl From<&digest::array::Array<u8, #con>> for #ident {
                 fn from(digest: &digest::array::Array<u8, #con>) -> Self {
-                    Self(base16ct::lower::encode_string(digest))
+                    Self(base16ct::lower::encode_string(digest).try_into().unwrap())
                 }
             }
 
@@ -130,13 +119,13 @@ impl ToTokens for StringWrapperRec {
 
             impl PartialEq<#ident> for String {
                 fn eq(&self, other: &#ident) -> bool {
-                    self == &other.0
+                    *self == *other.0
                 }
             }
 
             impl PartialEq<#ident> for str {
                 fn eq(&self, other: &#ident) -> bool {
-                    self == &other.0
+                    *self == *other.0
                 }
             }
 
@@ -190,25 +179,14 @@ impl ToTokens for StringWrapperRec {
                 pub fn as_str(&self) -> &str {
                     &self.0
                 }
-                /// Checks a given str against length and hexadecimal constraints of the hash type.
-                pub fn check_str(value: &str) -> Result<(), hash_strings::Error> {
-                    use hash_strings::{Error, LenError, EncodingError};
-                    use digest::typenum::Unsigned;
+                fn check_hex(value: &str) -> Result<(), hash_strings::Error> {
+                    use hash_strings::{Error, EncodingError};
 
-                    let got = value.len();
-                    let expected = #con::to_usize() * 2;
-                    if got != expected {
-                        return Err(Error::LenError(LenError { got, expected, hash_name: #hash_name.to_string() }));
-                    } else if !value.chars().all(|c| c.is_digit(16)) {
-                        return Err(Error::EncodingError(EncodingError { hash_name: #hash_name.to_string() }));
+                    if !value.chars().all(|c| c.is_digit(16)) {
+                        Err(Error::EncodingError(EncodingError { hash_name: #hash_name.to_string() }))
+                    } else {
+                        Ok(())
                     }
-                    Ok(())
-                }
-                /// Checks the underlying String against length and hexadecimal constraints of the hash type.
-                ///
-                /// Useful for ensuring an instance of Self initialized directly with a String is within bounds.
-                pub fn check(&self) -> Result<(), hash_strings::Error> {
-                    Self::check_str(self)
                 }
             }
         });

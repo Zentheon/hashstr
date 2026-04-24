@@ -1,14 +1,9 @@
-use darling::{FromDeriveInput, FromMeta};
+use darling::FromDeriveInput;
+use proc_macro_error::abort;
 use proc_macro2::TokenStream;
 use quote::{ToTokens, quote};
-use syn::Ident;
 
-#[derive(Debug, FromMeta)]
-pub struct StructAttr {
-    hasher: Ident,
-    hash_name: Option<String>,
-    con: Option<Ident>,
-}
+use crate::StructAttr;
 
 #[derive(Debug, FromDeriveInput)]
 #[darling(
@@ -33,9 +28,14 @@ impl ToTokens for StringDigestRec {
             ref attr,
         } = *self;
 
-        let hasher = attr.hasher.clone();
-        let _hash_name = attr.hash_name.clone();
-        let _con = attr.con.clone();
+        let hasher = attr
+            .hasher
+            .clone()
+            .unwrap_or_else(|| abort!(attr.hasher, "hasher attribute must be set"));
+        let digest = match attr.digest.clone() {
+            Some(idt) => quote! { #idt },
+            None => quote! { digest::Digest },
+        };
 
         // let (imp, ty, wher) = generics.split_for_impl();
 
@@ -48,7 +48,7 @@ impl ToTokens for StringDigestRec {
             impl #ident {
                 /// Digest some raw data and produce a hash.
                 pub fn digest(data: impl AsRef<[u8]>) -> Self {
-                    use digest::Digest;
+                    use #digest;
 
                     let hash = #hasher::digest(data).into();
 
@@ -64,7 +64,7 @@ impl ToTokens for StringDigestRec {
                     R: Sized,
                     R: std::io::Read,
                 {
-                    use digest::Digest;
+                    use #digest;
 
                     let mut hasher = digest_io::IoWrapper(#hasher::new());
                     let digested = std::io::copy(read, &mut hasher)?;
@@ -79,7 +79,7 @@ impl ToTokens for StringDigestRec {
                 ///
                 /// Returns errors produced by [`std::fs::File::open`] and [`std::io::copy`]
                 pub fn digest_file(path: impl AsRef<std::path::Path>) -> Result<Self, std::io::Error> {
-                    use digest::Digest;
+                    use #digest;
 
                     let mut file = std::fs::File::open(path.as_ref())?;
                     let mut hasher = digest_io::IoWrapper(#hasher::new());

@@ -10,3 +10,7 @@ readme = "../README.md"
 repository = "https://github.com/Zentheon/hash-strings"
 homepage = "https://github.com/Zentheon/hash-strings"
 license-file = "../LICENSE"
+
+[dependencies]
+fstr = "0.2.17"
+quote = "1.0.45"

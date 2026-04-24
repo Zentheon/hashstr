@@ -1,29 +1,37 @@
 use std::fmt::Display;
 
-#[derive(Debug)]
+use fstr::LengthError;
+
+#[derive(Debug, Clone)]
 pub struct LenError {
     pub expected: usize,
     pub got: usize,
     pub hash_name: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct EncodingError {
     pub hash_name: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Error {
-    LenError(LenError),
+    LengthError(LengthError),
     EncodingError(EncodingError),
 }
 
 impl Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::LenError(e) => write!(f, "{e}"),
+            Self::LengthError(e) => write!(f, "{e}"),
             Self::EncodingError(e) => write!(f, "{e}"),
         }
+    }
+}
+
+impl From<LengthError> for Error {
+    fn from(value: LengthError) -> Self {
+        Error::LengthError(value)
     }
 }
 

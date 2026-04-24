@@ -1,7 +1,5 @@
 use digest::consts::U16;
-use hash_strings_derive::{StringDigest, StringWrapper};
+use hash_strings_derive::impl_hash_string;
 use md4::Md4;
 
-#[derive(StringDigest, StringWrapper)]
-#[hash_string(hasher = Md4, con = U16)]
-pub struct Md4String(pub String);
+impl_hash_string!(hasher = Md4, con = U16);

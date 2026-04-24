@@ -1,10 +1,14 @@
-use digest::consts::U20;
+use digest::{consts::U20, typenum::Unsigned};
+use fstr::FStr;
 use hash_strings_derive::StringWrapper;
-use sha1_checked::{Sha1, digest::DynDigest};
+use sha1_checked::{
+    Sha1,
+    digest::{DynDigest, generic_array::GenericArray},
+};
 
-#[derive(StringWrapper)]
+#[derive(Debug, Clone, StringWrapper)]
 #[hash_string(hash_name = "Sha1Checked", con = U20)]
-pub struct Sha1CheckedString(pub String);
+pub struct Sha1CheckedString(pub FStr<{ U20::USIZE * 2 }>);
 
 /// Reimplementation of the [`sha1_checked::CollisionResult`] for [`Sha1CheckedString`]
 ///
@@ -46,12 +50,24 @@ impl CollisionResult {
 
 impl From<sha1_checked::CollisionResult> for CollisionResult {
     fn from(res: sha1_checked::CollisionResult) -> Self {
-        let wrapped = Sha1CheckedString(base16ct::lower::encode_string(res.hash()));
+        let hash_string = res.hash().into();
         match res {
-            sha1_checked::CollisionResult::Ok(_) => CollisionResult::Ok(wrapped),
-            sha1_checked::CollisionResult::Mitigated(_) => CollisionResult::Mitigated(wrapped),
-            sha1_checked::CollisionResult::Collision(_) => CollisionResult::Collision(wrapped),
+            sha1_checked::CollisionResult::Ok(_) => CollisionResult::Ok(hash_string),
+            sha1_checked::CollisionResult::Mitigated(_) => CollisionResult::Mitigated(hash_string),
+            sha1_checked::CollisionResult::Collision(_) => CollisionResult::Collision(hash_string),
         }
+    }
+}
+
+impl From<&GenericArray<u8, U20>> for Sha1CheckedString {
+    fn from(digest: &GenericArray<u8, U20>) -> Self {
+        Self(base16ct::lower::encode_string(digest).try_into().unwrap())
+    }
+}
+
+impl From<GenericArray<u8, U20>> for Sha1CheckedString {
+    fn from(digest: GenericArray<u8, U20>) -> Self {
+        Self::from(&digest)
     }
 }
 

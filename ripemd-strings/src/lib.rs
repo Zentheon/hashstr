@@ -1,19 +1,11 @@
 use digest::consts::{U16, U20, U32, U40};
-use hash_strings_derive::{StringDigest, StringWrapper};
+use hash_strings_derive::impl_hash_string;
 use ripemd::{Ripemd128, Ripemd160, Ripemd256, Ripemd320};
 
-#[derive(StringDigest, StringWrapper)]
-#[hash_string(hasher = Ripemd128, con = U16)]
-pub struct Ripemd128String(pub String);
+impl_hash_string!(hasher = Ripemd128, con = U16);
 
-#[derive(StringDigest, StringWrapper)]
-#[hash_string(hasher = Ripemd160, con = U20)]
-pub struct Ripemd160String(pub String);
+impl_hash_string!(hasher = Ripemd160, con = U20);
 
-#[derive(StringDigest, StringWrapper)]
-#[hash_string(hasher = Ripemd256, con = U32)]
-pub struct Ripemd256String(pub String);
+impl_hash_string!(hasher = Ripemd256, con = U32);
 
-#[derive(StringDigest, StringWrapper)]
-#[hash_string(hasher = Ripemd320, con = U40)]
-pub struct Ripemd320String(pub String);
+impl_hash_string!(hasher = Ripemd320, con = U40);
