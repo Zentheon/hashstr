@@ -275,7 +275,10 @@ dependencies = [
  "sha1-checked",
  "sha2",
  "sha3",
+ "shabal",
+ "skein",
  "sm3",
+ "streebog",
  "tiger",
  "tracing",
  "whirlpool",
@@ -503,16 +506,44 @@ dependencies = [
 ]
 
 [[package]]
+name = "shabal"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0bd3eeca4b3a9f418015311a4c3cdb3283d50b5da106aebe2cc700affa653cf1"
+dependencies = [
+ "digest 0.11.2",
+]
+
+[[package]]
 name = "shlex"
 version = "1.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
 
 [[package]]
+name = "skein"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8c0e3aac74371ed57c57e0406b65689e6fb4f58f90dfd54dd5fc1aba7f3ec481"
+dependencies = [
+ "digest 0.11.2",
+ "threefish",
+]
+
+[[package]]
 name = "sm3"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "da6a89ba31723d185fd7413b98c576a575f356d9b84729d8ecb6ead60000a5b6"
+dependencies = [
+ "digest 0.11.2",
+]
+
+[[package]]
+name = "streebog"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "942b8aca83a17a387b90643abe15430abd0aabc91d6db511e85827e7060746ef"
 dependencies = [
  "digest 0.11.2",
 ]
@@ -549,6 +580,12 @@ dependencies = [
  "quote",
  "unicode-ident",
 ]
+
+[[package]]
+name = "threefish"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d01bb3253ac4d5c6c7dbb6f4f66a8178a24deefe0067357ace6482db2f3ccc6e"
 
 [[package]]
 name = "tiger"

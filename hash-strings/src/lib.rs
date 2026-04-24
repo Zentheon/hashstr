@@ -22,8 +22,14 @@ pub mod sha1_checked;
 pub mod sha2;
 #[cfg(feature = "sha3")]
 pub mod sha3;
+#[cfg(feature = "shabal")]
+pub mod shabal;
+#[cfg(feature = "skein")]
+pub mod skein;
 #[cfg(feature = "sm3")]
 pub mod sm3;
+#[cfg(feature = "streebog")]
+pub mod streebog;
 #[cfg(feature = "tiger")]
 pub mod tiger;
 #[cfg(feature = "whirlpool")]
