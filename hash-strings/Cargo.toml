@@ -14,6 +14,8 @@ license-file = "../LICENSE"
 [features]
 default = ["tracing"]
 tracing = ["dep:tracing"]
+ascon-hash256 = ["dep:ascon-hash256"]
+bash-hash = ["dep:bash-hash"]
 belt-hash = ["dep:belt-hash"]
 blake2 = ["dep:blake2"]
 blake3 = ["dep:blake3"]
@@ -69,3 +71,5 @@ groestl = { version = "0.11.0", optional = true }
 gost94 = { version = "0.11.0", optional = true }
 fsb = { version = "0.2.0", optional = true }
 belt-hash = { version = "0.2.1", optional = true }
+bash-hash = { version = "0.1.0", optional = true }
+ascon-hash256 = { version = "0.1.0", optional = true }

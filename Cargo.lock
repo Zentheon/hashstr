@@ -15,10 +15,42 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7c02d123df017efcdfbd739ef81735b36c5ba83ec3c59c80a9d7ecc718f92e50"
 
 [[package]]
+name = "ascon"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f5a0543d9a0a29ecb1d2046beb7547e97941de03228a3f31e15addfc78836049"
+
+[[package]]
+name = "ascon-hash256"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6a8cf2de4b7ef5c2905be32f5131622fae577842d82fd109069b0c1e4ca26a32"
+dependencies = [
+ "ascon",
+ "digest 0.11.2",
+]
+
+[[package]]
 name = "base16ct"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fd307490d624467aa6f74b0eabb77633d1f758a7b25f12bceb0b22e08d9726f6"
+
+[[package]]
+name = "bash-f"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bfed5cd32720841afa8cd58c89a317e9efb0c8083e1b349dae4098f022620353"
+
+[[package]]
+name = "bash-hash"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d5cfc011e7d602c87515ea50f3ae053e3cf3a3e43461d57e8674f3f7f384ced1"
+dependencies = [
+ "bash-f",
+ "digest 0.11.2",
+]
 
 [[package]]
 name = "belt-block"
@@ -301,7 +333,9 @@ dependencies = [
 name = "hash-strings"
 version = "0.1.0"
 dependencies = [
+ "ascon-hash256",
  "base16ct",
+ "bash-hash",
  "belt-hash",
  "blake2",
  "blake3",

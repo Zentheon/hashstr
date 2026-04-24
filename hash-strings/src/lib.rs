@@ -2,6 +2,10 @@ use std::fmt::Display;
 
 use fstr::LengthError;
 
+#[cfg(feature = "ascon-hash256")]
+pub mod ascon_hash256;
+#[cfg(feature = "bash-hash")]
+pub mod bash_hash;
 #[cfg(feature = "belt-hash")]
 pub mod belt_hash;
 #[cfg(feature = "blake2")]
