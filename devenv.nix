@@ -13,9 +13,4 @@
 
     components = [ "rustc" "rust-src" "cargo" "clippy" "rustfmt" "rust-analyzer" ];
   };
-
-  git-hooks.hooks = {
-    rustfmt.enable = true;
-    clippy.enable = true;
-  };
 }
