@@ -28,11 +28,9 @@ impl ToTokens for StringWrapperRec {
             ref attr,
         } = *self;
 
-        let ident_str = ident.to_string();
-        let hasher = attr.hasher.clone();
         let hash_name = if let Some(name) = &attr.hash_name {
             name.to_string()
-        } else if let Some(name) = hasher {
+        } else if let Some(name) = attr.hasher.clone() {
             name.to_string()
         } else {
             abort!(
@@ -40,7 +38,10 @@ impl ToTokens for StringWrapperRec {
                 "Either hasher or hash_name attribute must be set"
             )
         };
-        let con = attr.con.clone();
+        let con = attr
+            .con
+            .clone()
+            .unwrap_or_else(|| abort!(attr.con, "Hash length constant is required"));
 
         // let (imp, ty, wher) = generics.split_for_impl();
 
@@ -131,23 +132,36 @@ impl ToTokens for StringWrapperRec {
 
             impl PartialEq<#ident> for String {
                 fn eq(&self, other: &#ident) -> bool {
-                    *self == *other.0
+                    constant_time_eq::constant_time_eq(self.as_ref(), other.0.as_ref())
+                }
+            }
+
+            impl PartialEq<#ident> for fstr::FStr<{
+                use digest::typenum::Unsigned;
+                #con::USIZE * 2
+            }> {
+                fn eq(&self, other: &#ident) -> bool {
+                    constant_time_eq::constant_time_eq(self.as_ref(), other.0.as_ref())
                 }
             }
 
             impl PartialEq<#ident> for str {
                 fn eq(&self, other: &#ident) -> bool {
-                    *self == *other.0
+                    constant_time_eq::constant_time_eq(self.as_ref(), other.0.as_ref())
                 }
             }
 
-            impl<O: AsRef<str>> PartialEq<O> for #ident {
+            impl PartialEq<#ident> for &str {
+                fn eq(&self, other: &#ident) -> bool {
+                    constant_time_eq::constant_time_eq(self.as_ref(), other.0.as_ref())
+                }
+            }
+
+            impl<O: AsRef<[u8]>> PartialEq<O> for #ident {
                 fn eq(&self, other: &O) -> bool {
-                    &self.0 == other.as_ref()
+                    constant_time_eq::constant_time_eq(self.0.as_ref(), other.as_ref())
                 }
             }
-
-            impl Eq for #ident {}
 
             impl std::hash::Hash for #ident {
                 fn hash<H: std::hash::Hasher>(&self, state: &mut H) {

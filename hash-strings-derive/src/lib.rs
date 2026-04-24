@@ -1,6 +1,6 @@
 extern crate proc_macro;
 
-use darling::{FromDeriveInput, FromMeta};
+use darling::{FromDeriveInput, FromMeta, util::Flag};
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{DeriveInput, Ident, parse_macro_input};
@@ -8,9 +8,15 @@ use syn::{DeriveInput, Ident, parse_macro_input};
 #[derive(Debug, FromMeta)]
 #[allow(dead_code)]
 pub(crate) struct StructAttr {
+    /// The hasher identifier to wrap as an FStr
     hasher: Option<Ident>,
+    /// Use a hasher's IO traits directly
+    no_io_wrapper: Flag,
+    /// Manually set the name of the hash instead of using the hasher ident
     hash_name: Option<String>,
+    /// Use a different digest trait
     digest: Option<Ident>,
+    /// Hash length constant
     con: Option<Ident>,
 }
 
@@ -57,7 +63,7 @@ pub fn impl_hash_string(input: TokenStream) -> TokenStream {
     let struct_ident = syn::Ident::new(&struct_name, proc_macro2::Span::call_site());
 
     let expanded = quote! {
-        #[derive(Debug, Clone, hash_strings_derive::StringDigest, hash_strings_derive::StringWrapper)]
+        #[derive(Debug, Clone, Eq, hash_strings_derive::StringDigest, hash_strings_derive::StringWrapper)]
         #[hash_string(hasher = #hasher, con = #con)]
         pub struct #struct_ident(pub fstr::FStr<{
             use digest::typenum::Unsigned;

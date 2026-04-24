@@ -32,6 +32,7 @@ impl ToTokens for StringDigestRec {
             .hasher
             .clone()
             .unwrap_or_else(|| abort!(attr.hasher, "hasher attribute must be set"));
+
         let digest = match attr.digest.clone() {
             Some(idt) => quote! { #idt },
             None => quote! { digest::Digest },
@@ -56,6 +57,19 @@ impl ToTokens for StringDigestRec {
                     tracing::trace!(%hash, "Generated a hash of raw data");
                     hash
                 }
+            }
+        });
+
+        let (io_init, io_finalize) = if attr.no_io_wrapper.is_present() {
+            (quote!(#hasher::new()), quote!(hasher.finalize()))
+        } else {
+            (
+                quote!(digest_io::IoWrapper(#hasher::new())),
+                quote!(hasher.0.finalize()),
+            )
+        };
+        tokens.extend(quote! {
+            impl #ident {
                 /// Attempts to digest the entirety of the given reader.
                 ///
                 /// Returns errors produced by [`std::io::copy`]
@@ -66,9 +80,9 @@ impl ToTokens for StringDigestRec {
                 {
                     use #digest;
 
-                    let mut hasher = digest_io::IoWrapper(#hasher::new());
+                    let mut hasher = #io_init;
                     let digested = std::io::copy(read, &mut hasher)?;
-                    let hash = Self::from(hasher.0.finalize());
+                    let hash = Self::from(#io_finalize);
 
                     #[cfg(feature = "tracing")]
                     tracing::trace!(digested, %hash, "Generated the hash of content in a reader");
@@ -82,9 +96,9 @@ impl ToTokens for StringDigestRec {
                     use #digest;
 
                     let mut file = std::fs::File::open(path.as_ref())?;
-                    let mut hasher = digest_io::IoWrapper(#hasher::new());
+                    let mut hasher = #io_init;
                     let digested = std::io::copy(&mut file, &mut hasher)?;
-                    let hash = Self::from(hasher.0.finalize());
+                    let hash = Self::from(#io_finalize);
 
                     #[cfg(feature = "tracing")]
                     tracing::trace!(digested, %hash, path = ?path.as_ref(), "Generated the hash of a file");

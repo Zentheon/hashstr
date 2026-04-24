@@ -6,7 +6,7 @@ use sha1_checked::{
     digest::{DynDigest, generic_array::GenericArray},
 };
 
-#[derive(Debug, Clone, StringWrapper)]
+#[derive(Debug, Clone, Eq, StringWrapper)]
 #[hash_string(hash_name = "Sha1Checked", con = U20)]
 pub struct Sha1CheckedString(pub FStr<{ U20::USIZE * 2 }>);
 
