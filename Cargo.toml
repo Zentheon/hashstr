@@ -11,4 +11,6 @@ members = [
     "md4-strings",
     "md5-strings",
     "ripemd-strings",
+    "blake2-strings",
+    "blake3-strings",
 ]
