@@ -22,6 +22,12 @@ pub mod sha1_checked;
 pub mod sha2;
 #[cfg(feature = "sha3")]
 pub mod sha3;
+#[cfg(feature = "sm3")]
+pub mod sm3;
+#[cfg(feature = "tiger")]
+pub mod tiger;
+#[cfg(feature = "whirlpool")]
+pub mod whirlpool;
 
 #[derive(Debug, Clone)]
 pub struct LenError {
