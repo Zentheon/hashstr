@@ -117,6 +117,18 @@ impl ToTokens for StringWrapperRec {
                 }
             }
 
+            impl From<&generic_array::GenericArray<u8, #con>> for #ident {
+                fn from(digest: &generic_array::GenericArray<u8, #con>) -> Self {
+                    Self(base16ct::lower::encode_string(digest).try_into().unwrap())
+                }
+            }
+
+            impl From<generic_array::GenericArray<u8, #con>> for #ident {
+                fn from(digest: generic_array::GenericArray<u8, #con>) -> Self {
+                    Self::from(&digest)
+                }
+            }
+
             impl PartialEq<#ident> for String {
                 fn eq(&self, other: &#ident) -> bool {
                     *self == *other.0
