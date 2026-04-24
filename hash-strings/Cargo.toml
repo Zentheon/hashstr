@@ -16,6 +16,9 @@ default = ["tracing"]
 tracing = ["dep:tracing"]
 blake2 = ["dep:blake2"]
 blake3 = ["dep:blake3"]
+groestl = ["dep:groestl"]
+jh = ["dep:jh"]
+kupyna = ["dep:kupyna"]
 md2 = ["dep:md2"]
 md4 = ["dep:md4"]
 md5 = ["dep:md-5"]
@@ -57,3 +60,6 @@ sm3 = { version = "0.5.0", optional = true }
 streebog = { version = "0.11.0", optional = true }
 tiger = { version = "0.3.0", optional = true }
 whirlpool = { version = "0.11.0", optional = true }
+kupyna = { version = "0.1.0", optional = true }
+jh = { version = "0.2.0", optional = true }
+groestl = { version = "0.11.0", optional = true }

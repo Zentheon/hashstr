@@ -6,6 +6,12 @@ use fstr::LengthError;
 pub mod blake2;
 #[cfg(feature = "blake3")]
 pub mod blake3;
+#[cfg(feature = "groestl")]
+pub mod groestl;
+#[cfg(feature = "jh")]
+pub mod jh;
+#[cfg(feature = "kupyna")]
+pub mod kupyna;
 #[cfg(feature = "md2")]
 pub mod md2;
 #[cfg(feature = "md4")]
