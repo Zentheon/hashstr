@@ -181,6 +181,7 @@ impl ToTokens for StringWrapperRec {
                 }
             }
 
+            #[cfg(feature = "serde")]
             impl serde::Serialize for #ident {
                 fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
                 where
@@ -190,6 +191,7 @@ impl ToTokens for StringWrapperRec {
                 }
             }
 
+            #[cfg(feature = "serde")]
             impl<'de> serde::Deserialize<'de> for #ident {
                 fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
                 where

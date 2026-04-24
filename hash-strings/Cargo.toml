@@ -12,8 +12,9 @@ homepage = "https://github.com/Zentheon/hash-strings"
 license-file = "../LICENSE"
 
 [features]
-default = ["tracing"]
+default = ["tracing", "serde"]
 tracing = ["dep:tracing"]
+serde = ["dep:serde"]
 ascon-hash256 = ["dep:ascon-hash256"]
 bash-hash = ["dep:bash-hash"]
 belt-hash = ["dep:belt-hash"]
@@ -43,7 +44,7 @@ whirlpool = ["dep:whirlpool"]
 hash-strings-derive = { path = "../hash-strings-derive" }
 fstr = "0.2.17"
 generic-array = "1.3.5"
-serde = { version = "1.0.219" }
+serde = { version = "1.0.219", optional = true }
 tracing = { version = "0.1.41", optional = true }
 constant_time_eq = "0.5.0"
 digest = "0.11.2"
