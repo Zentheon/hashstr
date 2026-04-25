@@ -1,5 +1,4 @@
 use darling::FromDeriveInput;
-use proc_macro_error::abort;
 use proc_macro2::TokenStream;
 use quote::{ToTokens, quote};
 
@@ -28,15 +27,8 @@ impl ToTokens for StringDigestRec {
             ref attr,
         } = *self;
 
-        let hasher = attr
-            .hasher
-            .clone()
-            .unwrap_or_else(|| abort!(attr.hasher, "hasher attribute must be set"));
-
-        let digest = match attr.digest.clone() {
-            Some(idt) => quote! { #idt },
-            None => quote! { digest::Digest },
-        };
+        let hasher = attr.unwrap_hasher();
+        let digest = attr.unwrap_digest();
 
         // let (imp, ty, wher) = generics.split_for_impl();
 

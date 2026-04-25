@@ -1,5 +1,6 @@
 use darling::{FromMeta, util::Flag};
 use proc_macro_error::abort;
+use quote::quote;
 use syn::{Ident, LitStr};
 
 #[derive(Debug, FromMeta)]
@@ -39,6 +40,12 @@ impl Args {
                 self.hash_name,
                 "Either hasher or hash_name attribute must be set"
             )
+        }
+    }
+    pub fn unwrap_digest(&self) -> proc_macro2::TokenStream {
+        match self.digest.clone() {
+            Some(idt) => quote! { #idt },
+            None => quote! { digest::Digest },
         }
     }
     pub fn unwrap_con(&self) -> Ident {

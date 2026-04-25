@@ -1,11 +1,11 @@
 use crate::{EncodingError, Error};
 use blake3::{Hash, Hasher};
-use digest::consts::U16;
+use digest::consts::U32;
 use hash_strings_derive::{StringWrapper, impl_hash_string_tests};
 
 #[derive(Clone, Debug, Eq, StringWrapper)]
-#[hash_strings(hasher = Hash, con = U16, hash_name = "Blake3", no_io_wrapper)]
-pub struct Blake3String(pub fstr::FStr<32>);
+#[hash_strings(hasher = Hash, con = U32, hash_name = "Blake3", no_io_wrapper)]
+pub struct Blake3String(pub fstr::FStr<64>);
 
 impl Default for Blake3String {
     fn default() -> Self {
@@ -14,7 +14,7 @@ impl Default for Blake3String {
 }
 impl From<Hash> for Blake3String {
     fn from(value: Hash) -> Self {
-        Self(fstr::FStr::try_from(value.as_bytes()).unwrap())
+        Self(fstr::FStr::try_from(value.to_hex().as_bytes()).unwrap())
     }
 }
 
@@ -63,4 +63,4 @@ impl Blake3String {
     }
 }
 
-impl_hash_string_tests!(hasher = Hash, hash_name = "Blake3", con = U16,);
+impl_hash_string_tests!(hasher = Hash, hash_name = "Blake3", con = U32,);

@@ -30,7 +30,7 @@ pub fn impl_hash_string_tests(input: TokenStream) -> TokenStream {
                 fn digest() {
                     use digest::typenum::Unsigned;
 
-                    let hash1 = #ident_lower::digest([]);
+                    let hash1 = #ident_lower::digest([30]);
                     assert!(hash1.0.len() == #con::USIZE * 2);
                 }
             },

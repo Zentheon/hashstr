@@ -1,5 +1,4 @@
 use darling::FromDeriveInput;
-use proc_macro_error::abort;
 use proc_macro2::TokenStream;
 use quote::{ToTokens, quote};
 
@@ -28,20 +27,8 @@ impl ToTokens for StringWrapperRec {
             ref attr,
         } = *self;
 
-        let hash_name = if let Some(name) = &attr.hash_name {
-            name.to_string()
-        } else if let Some(name) = attr.hasher.clone() {
-            name.to_string()
-        } else {
-            abort!(
-                attr.hash_name,
-                "Either hasher or hash_name attribute must be set"
-            )
-        };
-        let con = attr
-            .con
-            .clone()
-            .unwrap_or_else(|| abort!(attr.con, "Hash length constant is required"));
+        let hash_name = attr.unwrap_hash_name();
+        let con = attr.unwrap_con();
 
         // let (imp, ty, wher) = generics.split_for_impl();
 
