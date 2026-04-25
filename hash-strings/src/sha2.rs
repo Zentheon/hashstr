@@ -14,12 +14,3 @@ impl_hash_string!(hasher = Sha512, con = U64);
 impl_hash_string!(hasher = Sha512_224, con = U28);
 
 impl_hash_string!(hasher = Sha512_256, con = U32);
-
-fn dings() {
-    let data = b"Some tasty data";
-
-    let hash_lower = Sha256String::digest(data);
-    let hash_upper = Sha256String::digest(data);
-
-    assert!(true);
-}

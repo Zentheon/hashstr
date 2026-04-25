@@ -1,24 +1,12 @@
 extern crate proc_macro;
 
-use darling::{FromDeriveInput, FromMeta, util::Flag};
+use darling::FromDeriveInput;
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{DeriveInput, Ident, parse_macro_input};
+use syn::{DeriveInput, parse_macro_input};
 
-#[derive(Debug, FromMeta)]
-#[allow(dead_code)]
-pub(crate) struct StructAttr {
-    /// The hasher identifier to wrap as an FStr
-    hasher: Option<Ident>,
-    /// Use a hasher's IO traits directly
-    no_io_wrapper: Flag,
-    /// Manually set the name of the hash instead of using the hasher ident
-    hash_name: Option<String>,
-    /// Use a different digest trait
-    digest: Option<Ident>,
-    /// Hash length constant
-    con: Option<Ident>,
-}
+mod args;
+pub(crate) use args::Args;
 
 mod hashing;
 
@@ -40,29 +28,27 @@ pub fn derive_string_wrapper(ts: TokenStream) -> TokenStream {
     tokens.into()
 }
 
-#[derive(Debug, FromMeta)]
-#[darling(derive_syn_parse)]
-struct MacroArgs {
-    hasher: Ident,
-    con: Ident,
+mod tests;
+
+#[proc_macro]
+pub fn impl_hash_string_tests(input: TokenStream) -> TokenStream {
+    tests::impl_hash_string_tests(input)
 }
 
 #[proc_macro]
 /// Generates impls for the simplest of hashers that don't require anything special
 pub fn impl_hash_string(input: TokenStream) -> TokenStream {
-    let args: MacroArgs = match syn::parse(input) {
+    let args: Args = match syn::parse(input) {
         Ok(v) => v,
         Err(e) => {
             return e.to_compile_error().into();
         }
     };
 
-    let hasher = args.hasher;
-    let con = args.con;
-    let struct_lower = format!("{}{}", hasher, "String");
-    let struct_upper = format!("{}{}", hasher, "StringUpper");
-    let ident_lower = syn::Ident::new(&struct_lower, proc_macro2::Span::call_site());
-    let ident_upper = syn::Ident::new(&struct_upper, proc_macro2::Span::call_site());
+    let con = args.unwrap_con();
+    let hasher = args.unwrap_hasher();
+    let ident_lower = args.unwrap_ident_lower();
+    let ident_upper = args.unwrap_ident_upper();
 
     let expanded = quote! {
         #[derive(Debug, Clone, Eq, hash_strings_derive::StringDigest, hash_strings_derive::StringWrapper)]
@@ -71,7 +57,6 @@ pub fn impl_hash_string(input: TokenStream) -> TokenStream {
             use digest::typenum::Unsigned;
             #con::USIZE * 2
         }>);
-        hash_strings_derive::impl_hash_string_tests!(hasher = #hasher, con = #con);
 
         #[derive(Debug, Clone, Eq, hash_strings_derive::StringDigest, hash_strings_derive::StringWrapper)]
         #[hash_strings(hasher = #hasher, con = #con)]
@@ -79,6 +64,8 @@ pub fn impl_hash_string(input: TokenStream) -> TokenStream {
             use digest::typenum::Unsigned;
             #con::USIZE * 2
         }>);
+
+        hash_strings_derive::impl_hash_string_tests!(hasher = #hasher, con = #con);
     };
 
     expanded.into()

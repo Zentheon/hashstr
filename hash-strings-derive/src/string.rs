@@ -3,7 +3,7 @@ use proc_macro_error::abort;
 use proc_macro2::TokenStream;
 use quote::{ToTokens, quote};
 
-use crate::StructAttr;
+use crate::Args;
 
 #[derive(Debug, FromDeriveInput)]
 #[darling(
@@ -16,7 +16,7 @@ pub struct StringWrapperRec {
     // generics: syn::Generics,
     // data: ast::Data<(), FieldRec>,
     #[darling(flatten)]
-    attr: StructAttr,
+    attr: Args,
 }
 
 impl ToTokens for StringWrapperRec {

@@ -1,7 +1,7 @@
 use crate::{EncodingError, Error};
 use blake3::{Hash, Hasher};
 use digest::consts::U16;
-use hash_strings_derive::StringWrapper;
+use hash_strings_derive::{StringWrapper, impl_hash_string_tests};
 
 #[derive(Clone, Debug, Eq, StringWrapper)]
 #[hash_strings(hasher = Hash, con = U16, hash_name = "Blake3", no_io_wrapper)]
@@ -62,3 +62,5 @@ impl Blake3String {
         Ok(hash)
     }
 }
+
+impl_hash_string_tests!(hasher = Hash, hash_name = "Blake3", con = U16,);

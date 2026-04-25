@@ -1,7 +1,7 @@
 use crate::{EncodingError, Error};
 use blake2::{Blake2b512, Blake2s256, Digest, digest::generic_array::GenericArray};
 use digest::consts::{U32, U64};
-use hash_strings_derive::{StringDigest, StringWrapper};
+use hash_strings_derive::{StringDigest, StringWrapper, impl_hash_string_tests};
 
 #[derive(Clone, Debug, Eq, StringDigest, StringWrapper)]
 #[hash_strings(hasher = Blake2s256, con = U32, digest = Digest, no_io_wrapper)]
@@ -34,3 +34,6 @@ impl From<GenericArray<u8, U64>> for Blake2b512String {
         Self::from(&digest)
     }
 }
+
+impl_hash_string_tests!(hasher = Blake2s256, con = U32,);
+impl_hash_string_tests!(hasher = Blake2b512, con = U64,);

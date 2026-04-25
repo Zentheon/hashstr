@@ -1,7 +1,7 @@
 use crate::{EncodingError, Error};
 use digest::{consts::U20, typenum::Unsigned};
 use fstr::FStr;
-use hash_strings_derive::StringWrapper;
+use hash_strings_derive::{StringWrapper, impl_hash_string_tests};
 use sha1_checked::{
     Sha1,
     digest::{DynDigest, generic_array::GenericArray},
@@ -125,3 +125,10 @@ impl Sha1CheckedString {
         Ok(result)
     }
 }
+
+impl_hash_string_tests!(
+    hasher = Sha1,
+    hash_name = "Sha1Checked",
+    con = U20,
+    ignore_tests = ["digest"]
+);
