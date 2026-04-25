@@ -1,6 +1,11 @@
-use std::fmt::Display;
+#![doc = include_str!("../../README.md")]
 
-use fstr::LengthError;
+// Hashers with custom code:
+// blake2
+// blake3
+// sha1_checked
+
+use std::fmt::Display;
 
 #[cfg(feature = "ascon-hash256")]
 pub mod ascon_hash256;
@@ -52,9 +57,9 @@ pub mod tiger;
 pub mod whirlpool;
 
 #[derive(Debug, Clone)]
-pub struct LenError {
+pub struct LengthError {
     pub expected: usize,
-    pub got: usize,
+    pub actual: usize,
     pub hash_name: String,
 }
 
@@ -78,22 +83,29 @@ impl Display for Error {
     }
 }
 
-impl From<LengthError> for Error {
-    fn from(value: LengthError) -> Self {
-        Error::LengthError(value)
+impl Error {
+    pub fn from_fstr_err<T>(res: Result<T, fstr::LengthError>, name: &str) -> Result<T, Error> {
+        match res {
+            Ok(v) => Ok(v),
+            Err(e) => Err(Error::LengthError(LengthError {
+                expected: e.expected(),
+                actual: e.actual(),
+                hash_name: name.to_string(),
+            })),
+        }
     }
 }
 
-impl std::error::Error for LenError {}
+impl std::error::Error for LengthError {}
 impl std::error::Error for EncodingError {}
 impl std::error::Error for Error {}
 
-impl Display for LenError {
+impl Display for LengthError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "Invalid length of {}. Expected: {}, got: {}",
-            self.hash_name, self.expected, self.got
+            "Invalid {} length of {} (expected: {})",
+            self.hash_name, self.expected, self.actual
         )
     }
 }

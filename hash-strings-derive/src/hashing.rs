@@ -7,7 +7,7 @@ use crate::StructAttr;
 
 #[derive(Debug, FromDeriveInput)]
 #[darling(
-    attributes(hash_string),
+    attributes(hash_strings),
     supports(struct_any),
     // forward_attrs(allow, doc, cfg)
 )]
@@ -82,7 +82,7 @@ impl ToTokens for StringDigestRec {
 
                     let mut hasher = #io_init;
                     let digested = std::io::copy(read, &mut hasher)?;
-                    let hash = Self::from(#io_finalize);
+                    let hash = Self::from(&#io_finalize);
 
                     #[cfg(feature = "tracing")]
                     tracing::trace!(digested, %hash, "Generated the hash of content in a reader");
@@ -98,7 +98,7 @@ impl ToTokens for StringDigestRec {
                     let mut file = std::fs::File::open(path.as_ref())?;
                     let mut hasher = #io_init;
                     let digested = std::io::copy(&mut file, &mut hasher)?;
-                    let hash = Self::from(#io_finalize);
+                    let hash = Self::from(&#io_finalize);
 
                     #[cfg(feature = "tracing")]
                     tracing::trace!(digested, %hash, path = ?path.as_ref(), "Generated the hash of a file");

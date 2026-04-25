@@ -8,7 +8,7 @@ use sha1_checked::{
 };
 
 #[derive(Debug, Clone, Eq, StringWrapper)]
-#[hash_string(hash_name = "Sha1Checked", con = U20)]
+#[hash_strings(hash_name = "Sha1Checked", con = U20)]
 pub struct Sha1CheckedString(pub FStr<{ U20::USIZE * 2 }>);
 
 /// Reimplementation of the [`sha1_checked::CollisionResult`] for [`Sha1CheckedString`]

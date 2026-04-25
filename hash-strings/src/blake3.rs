@@ -4,7 +4,7 @@ use digest::consts::U16;
 use hash_strings_derive::StringWrapper;
 
 #[derive(Clone, Debug, Eq, StringWrapper)]
-#[hash_string(hasher = Hash, con = U16, hash_name = "Blake3", no_io_wrapper)]
+#[hash_strings(hasher = Hash, con = U16, hash_name = "Blake3", no_io_wrapper)]
 pub struct Blake3String(pub fstr::FStr<32>);
 
 impl Default for Blake3String {

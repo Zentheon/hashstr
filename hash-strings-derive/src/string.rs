@@ -7,7 +7,7 @@ use crate::StructAttr;
 
 #[derive(Debug, FromDeriveInput)]
 #[darling(
-    attributes(hash_string),
+    attributes(hash_strings),
     supports(struct_any),
     // forward_attrs(allow, doc, cfg)
 )]
@@ -85,7 +85,9 @@ impl ToTokens for StringWrapperRec {
                 type Error = Error;
 
                 fn try_from(value: &str) -> Result<Self, Self::Error> {
-                    Self::try_from(value.to_string())
+                    Self::check_hex(value)?;
+                    let fstr = Error::from_fstr_err(value.parse(), &#hash_name)?;
+                    Ok(Self(fstr))
                 }
             }
 
@@ -93,8 +95,7 @@ impl ToTokens for StringWrapperRec {
                 type Error = Error;
 
                 fn try_from(value: String) -> Result<Self, Self::Error> {
-                    Self::check_hex(&value)?;
-                    Ok(Self(value.parse()?))
+                    Self::try_from(value.as_str())
                 }
             }
 
@@ -108,7 +109,8 @@ impl ToTokens for StringWrapperRec {
 
             impl From<&digest::array::Array<u8, #con>> for #ident {
                 fn from(digest: &digest::array::Array<u8, #con>) -> Self {
-                    Self(base16ct::lower::encode_string(digest).try_into().unwrap())
+                    let fstr = fstr::FStr::try_from(base16ct::lower::encode_string(digest)).unwrap();
+                    Self(fstr)
                 }
             }
 
