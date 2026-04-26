@@ -1,5 +1,6 @@
 use darling::{FromMeta, util::Flag};
 use proc_macro_error::abort;
+use proc_macro2::Span;
 use quote::quote;
 use syn::{Ident, LitStr};
 
@@ -42,6 +43,18 @@ impl Args {
             )
         }
     }
+    pub fn hash_name_str(&self) -> LitStr {
+        if let Some(name) = &self.hash_name {
+            LitStr::new(name, Span::call_site())
+        } else if let Some(name) = self.hasher.clone() {
+            LitStr::new(&name.to_string(), Span::call_site())
+        } else {
+            abort!(
+                self.hash_name,
+                "Either hasher or hash_name attribute must be set"
+            )
+        }
+    }
     pub fn unwrap_digest(&self) -> proc_macro2::TokenStream {
         match self.digest.clone() {
             Some(idt) => quote! { #idt },
@@ -53,6 +66,26 @@ impl Args {
             con.clone()
         } else {
             abort!(self.con, "Hash length constant is required")
+        }
+    }
+    /// Expression that results in the usize of a typenum const
+    pub fn unwrap_con_usize(&self) -> proc_macro2::TokenStream {
+        let con = self.unwrap_con();
+        quote! {
+            {
+                use digest::typenum::Unsigned;
+                #con::USIZE
+            }
+        }
+    }
+    /// Expression that results in the usize of a typenum const * 2
+    pub fn unwrap_con_usize_x2(&self) -> proc_macro2::TokenStream {
+        let con = self.unwrap_con();
+        quote! {
+            {
+                use digest::typenum::Unsigned;
+                #con::USIZE * 2
+            }
         }
     }
     pub fn unwrap_ident_lower(&self) -> Ident {

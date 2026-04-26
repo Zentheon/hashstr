@@ -1,8 +1,6 @@
-crate/target
-crate/result
-crate/result-lib
-crate/store
-crate/zendexes
+target
+result
+result-lib
 .direnv
 .devenv
 

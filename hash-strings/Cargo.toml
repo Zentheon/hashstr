@@ -74,3 +74,5 @@ fsb = { version = "0.2.0", optional = true }
 belt-hash = { version = "0.2.1", optional = true }
 bash-hash = { version = "0.1.0", optional = true }
 ascon-hash256 = { version = "0.1.0", optional = true }
+hybrid-array = "0.4.11"
+const-hex = "1.18.1"

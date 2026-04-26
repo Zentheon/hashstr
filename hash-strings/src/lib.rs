@@ -7,6 +7,9 @@
 
 use std::fmt::Display;
 
+use const_hex::encode_to_slice;
+use fstr::FStr;
+
 #[cfg(feature = "ascon-hash256")]
 pub mod ascon_hash256;
 #[cfg(feature = "bash-hash")]
@@ -56,16 +59,57 @@ pub mod tiger;
 #[cfg(feature = "whirlpool")]
 pub mod whirlpool;
 
+/// Encodes a byte slice to an [`FStr`] in lowercase hexidecminal
+pub fn encode_lower_hex<const N: usize>(
+    value: impl AsRef<[u8]>,
+    hash_name: &'static str,
+) -> Result<FStr<N>, Error> {
+    let value = value.as_ref();
+    let mut hex = [0u8; _];
+
+    assert!(hex.len() == 2 * value.len());
+    match encode_to_slice(value, &mut hex) {
+        // SAFETY: Must be valid utf-8. Should already be well within bounds after the hex
+        // encode
+        Ok(_) => Ok(unsafe { FStr::from_inner_unchecked(hex) }),
+        Err(err) => Err(Error::from_hex_err::<N>(err, value.len(), hash_name)),
+    }
+}
+
+/// Encodes a byte slice to an [`FStr`] in lowercase hexidecminal
+pub const fn encode_lower_hex_const<const N: usize>(value: &[u8; N]) -> FStr<N> {
+    let buf = const_hex::const_encode::<N, false>(value);
+    // SAFETY: Must be valid utf-8. Should already be well within bounds after the hex
+    // encode
+    unsafe { FStr::from_inner_unchecked(*buf.as_byte_array()) }
+}
+
+/// Builds an [`Error`] if the input value length is not `N`
+pub const fn check_len<const N: usize>(value: &[u8], hash_name: &'static str) -> Result<(), Error> {
+    let actual = value.len();
+    if actual == N {
+        Ok(())
+    } else {
+        Err(Error::LengthError(LengthError {
+            expected: N,
+            actual,
+            hash_name,
+        }))
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct LengthError {
-    pub expected: usize,
-    pub actual: usize,
-    pub hash_name: String,
+    pub(crate) expected: usize,
+    pub(crate) actual: usize,
+    pub(crate) hash_name: &'static str,
 }
 
 #[derive(Debug, Clone)]
 pub struct EncodingError {
-    pub hash_name: String,
+    pub(crate) c: char,
+    pub(crate) index: usize,
+    pub(crate) hash_name: &'static str,
 }
 
 #[derive(Debug, Clone)]
@@ -84,14 +128,42 @@ impl Display for Error {
 }
 
 impl Error {
-    pub fn from_fstr_err<T>(res: Result<T, fstr::LengthError>, name: &str) -> Result<T, Error> {
+    pub fn from_fstr_err<T>(
+        res: Result<T, fstr::LengthError>,
+        name: &'static str,
+    ) -> Result<T, Error> {
         match res {
             Ok(v) => Ok(v),
             Err(e) => Err(Error::LengthError(LengthError {
                 expected: e.expected(),
                 actual: e.actual(),
-                hash_name: name.to_string(),
+                hash_name: name,
             })),
+        }
+    }
+    pub const fn from_hex_err<const N: usize>(
+        err: const_hex::FromHexError,
+        len: usize,
+        hash_name: &'static str,
+    ) -> Error {
+        match err {
+            const_hex::FromHexError::InvalidHexCharacter { c, index } => {
+                Error::EncodingError(EncodingError {
+                    c,
+                    index,
+                    hash_name,
+                })
+            }
+            const_hex::FromHexError::OddLength => Error::LengthError(LengthError {
+                expected: N,
+                actual: len,
+                hash_name,
+            }),
+            const_hex::FromHexError::InvalidStringLength => Error::LengthError(LengthError {
+                expected: N,
+                actual: len,
+                hash_name,
+            }),
         }
     }
 }
