@@ -20,14 +20,14 @@ pub fn impl_hash_string(input: TokenStream) -> TokenStream {
     let expanded = quote! {
         #[derive(Debug, Clone, Eq, hash_strings_derive::StringDigest, hash_strings_derive::StringWrapper)]
         #[hash_strings(hasher = #hasher, con = #con)]
-        pub struct #ident_lower(pub fstr::FStr<{
+        pub struct #ident_lower(fstr::FStr<{
             use digest::typenum::Unsigned;
             #con::USIZE * 2
         }>);
 
         #[derive(Debug, Clone, Eq, hash_strings_derive::StringDigest, hash_strings_derive::StringWrapper)]
         #[hash_strings(hasher = #hasher, con = #con)]
-        pub struct #ident_upper(pub fstr::FStr<{
+        pub struct #ident_upper(fstr::FStr<{
             use digest::typenum::Unsigned;
             #con::USIZE * 2
         }>);

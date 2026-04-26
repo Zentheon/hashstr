@@ -5,7 +5,7 @@ use hash_strings_derive::{StringWrapper, impl_hash_string_tests};
 
 #[derive(Clone, Debug, Eq, StringWrapper)]
 #[hash_strings(hasher = Hash, con = U32, hash_name = "Blake3", no_io_wrapper)]
-pub struct Blake3String(pub fstr::FStr<64>);
+pub struct Blake3String(fstr::FStr<64>);
 
 impl Default for Blake3String {
     fn default() -> Self {

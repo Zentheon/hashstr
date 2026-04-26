@@ -5,11 +5,11 @@ use hash_strings_derive::{StringDigest, StringWrapper, impl_hash_string_tests};
 
 #[derive(Clone, Debug, Eq, StringDigest, StringWrapper)]
 #[hash_strings(hasher = Blake2s256, con = U32, digest = Digest, no_io_wrapper)]
-pub struct Blake2s256String(pub fstr::FStr<64>);
+pub struct Blake2s256String(fstr::FStr<64>);
 
 #[derive(Clone, Debug, Eq, StringDigest, StringWrapper)]
 #[hash_strings(hasher = Blake2b512, con = U64, digest = Digest, no_io_wrapper)]
-pub struct Blake2b512String(pub fstr::FStr<128>);
+pub struct Blake2b512String(fstr::FStr<128>);
 
 impl From<&GenericArray<u8, U32>> for Blake2s256String {
     fn from(digest: &GenericArray<u8, U32>) -> Self {
