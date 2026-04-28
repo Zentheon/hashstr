@@ -97,7 +97,6 @@ impl StringWrapperRec {
                 ///
                 /// # Errors
                 /// * [`crate::Error::LengthError`]: If the input bytes are not the expected hash length.
-                /// * [`crate::Error::EncodingError`]: If any byte is not valid utf-8
                 pub fn encode_bytes(value: impl AsRef<[u8]>) -> Result<Self, crate::Error> {
                     let hex = crate::encode_hex::<#con_int_x2>(value, #upper, #hash_name_str)?;
                     Ok(Self(hex))
@@ -106,10 +105,6 @@ impl StringWrapperRec {
                 ///
                 /// If you don't have a super cool compile-time use case, prefer the aforementioned runtime
                 /// variant instead.
-                ///
-                /// # Errors
-                /// * [`crate::Error::LengthError`]: If the input bytes are not the expected hash length.
-                /// * [`crate::Error::EncodingError`]: If any byte is not valid utf-8
                 pub const fn encode_slice(value: &[u8; #con_int_x2]) -> Self {
                     Self(crate::encode_hex_const::<#con_int_x2, #upper>(value))
                 }

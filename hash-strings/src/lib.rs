@@ -204,7 +204,7 @@ pub struct LengthError {
 }
 
 #[derive(Debug, Clone)]
-pub struct EncodingError {
+pub struct HexError {
     pub(crate) c: char,
     pub(crate) index: usize,
     pub(crate) hash_name: &'static str,
@@ -213,14 +213,14 @@ pub struct EncodingError {
 #[derive(Debug, Clone)]
 pub enum Error {
     LengthError(LengthError),
-    EncodingError(EncodingError),
+    HexError(HexError),
 }
 
 impl Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::LengthError(e) => write!(f, "{e}"),
-            Self::EncodingError(e) => write!(f, "{e}"),
+            Self::HexError(e) => write!(f, "{e}"),
         }
     }
 }
@@ -247,7 +247,7 @@ impl Error {
     ) -> Error {
         match err {
             const_hex::FromHexError::InvalidHexCharacter { c, index } => {
-                Error::EncodingError(EncodingError {
+                Error::HexError(HexError {
                     c,
                     index,
                     hash_name,
@@ -268,7 +268,7 @@ impl Error {
 }
 
 impl std::error::Error for LengthError {}
-impl std::error::Error for EncodingError {}
+impl std::error::Error for HexError {}
 impl std::error::Error for Error {}
 
 impl Display for LengthError {
@@ -281,7 +281,7 @@ impl Display for LengthError {
     }
 }
 
-impl Display for EncodingError {
+impl Display for HexError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "Characters in {} should be hexadecimal", self.hash_name)
     }
