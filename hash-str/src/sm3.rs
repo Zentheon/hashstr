@@ -1,0 +1,5 @@
+use digest::consts::U32;
+use hash_str_derive::impl_hash_str;
+use sm3::Sm3;
+
+impl_hash_str!(hasher = sm3::Sm3, con = U32);
