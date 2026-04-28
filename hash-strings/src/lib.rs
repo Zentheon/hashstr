@@ -68,7 +68,9 @@ pub const HEX_LETTERS_UPPER: &[u8; 6] = b"ABCDEF";
 ///
 /// This function only finds letters 'A' through 'F' and case-swaps them; it does not care if the
 /// input is properly encoded hex or not.
-pub const fn convert_hex_case<const N: usize, const TO_UPPER: bool>(hex: &[u8; N]) -> [u8; N] {
+pub const fn convert_hex_case<const HEX_LEN: usize, const TO_UPPER: bool>(
+    hex: &[u8; HEX_LEN],
+) -> [u8; HEX_LEN] {
     // Initial vars
     let (search, replace) = if TO_UPPER {
         (HEX_LETTERS_LOWER, HEX_LETTERS_UPPER)
@@ -78,12 +80,12 @@ pub const fn convert_hex_case<const N: usize, const TO_UPPER: bool>(hex: &[u8; N
     debug_assert!(search.len() == replace.len());
     let lookup_end = search.len() - 1;
 
-    let mut converted = [0u8; N];
+    let mut converted = [0u8; HEX_LEN];
     let mut pos = 0;
     let mut lookup = 0;
 
     // Loop over chars in hex input
-    while pos < N {
+    while pos < HEX_LEN {
         // Try to find casing matches that should be swapped
         while lookup <= lookup_end {
             if hex[pos] == search[lookup] {
@@ -102,17 +104,10 @@ pub const fn convert_hex_case<const N: usize, const TO_UPPER: bool>(hex: &[u8; N
     converted
 }
 
-#[test]
-fn test_convert_hex_case() {
-    let hex1: &[u8; 6] = b"f2ad9a";
-    let hex2: &[u8; 12] = b"adFcAaaBCCfd";
-    let hex3: &[u8; 12] = b"AABBCCDDEEFF";
-
-    let upper1 = convert_hex_case::<6, true>(hex1);
-}
-
-pub const fn convert_hex_case_fstr<const N: usize, const TO_UPPER: bool>(hex: &FStr<N>) -> FStr<N> {
-    let hex_array = convert_hex_case::<N, TO_UPPER>(hex.as_bytes());
+pub const fn convert_hex_case_fstr<const HEX_LEN: usize, const TO_UPPER: bool>(
+    hex: &FStr<HEX_LEN>,
+) -> FStr<HEX_LEN> {
+    let hex_array = convert_hex_case::<HEX_LEN, TO_UPPER>(hex.as_bytes());
     unsafe { FStr::from_inner_unchecked(hex_array) }
 }
 
@@ -144,15 +139,16 @@ fn test_convert_hex_case_fstr() {
 /// * `value`: The data to encode.
 /// * `upper`: Encodes to uppercase hex if `true`.
 /// * `hash_name`: Name of the hasher to use in an error.
-pub fn encode_hex<const N: usize>(
+///
+/// # Errors
+/// * [`Error::LengthError`]: If `value.len()` is does not equal `N * 2`
+pub fn encode_hex<const HEX_LEN: usize>(
     value: impl AsRef<[u8]>,
     upper: bool,
     hash_name: &'static str,
-) -> Result<FStr<N>, Error> {
+) -> Result<FStr<HEX_LEN>, Error> {
     let value = value.as_ref();
-    let mut hex = [0u8; _];
-
-    assert!(hex.len() == 2 * value.len());
+    let mut hex = [0u8; HEX_LEN];
 
     let encode = if upper {
         const_hex::encode_to_slice_upper(value, &mut hex)
@@ -163,13 +159,20 @@ pub fn encode_hex<const N: usize>(
         // SAFETY: Must be valid utf-8. Should already be well within bounds after the hex
         // encode
         Ok(_) => Ok(unsafe { FStr::from_inner_unchecked(hex) }),
-        Err(err) => Err(Error::from_hex_err::<N>(err, value.len(), hash_name)),
+        Err(err) => Err(Error::from_hex_err(
+            err,
+            HEX_LEN / 2,
+            value.len(),
+            hash_name,
+        )),
     }
 }
 
 /// Encodes a byte slice to an [`FStr`] in lowercase hexidecimal
-pub const fn encode_hex_const<const N: usize, const UPPER: bool>(value: &[u8; N]) -> FStr<N> {
-    let buf: const_hex::Buffer<N> = if UPPER {
+pub const fn encode_hex_const<const HEX_LEN: usize, const UPPER: bool>(
+    value: &[u8; HEX_LEN],
+) -> FStr<HEX_LEN> {
+    let buf: const_hex::Buffer<HEX_LEN> = if UPPER {
         const_hex::Buffer::new().const_format_upper(value)
     } else {
         const_hex::Buffer::new().const_format(value)
@@ -236,9 +239,10 @@ impl Error {
             })),
         }
     }
-    pub const fn from_hex_err<const N: usize>(
+    pub const fn from_hex_err(
         err: const_hex::FromHexError,
-        len: usize,
+        expected: usize,
+        actual: usize,
         hash_name: &'static str,
     ) -> Error {
         match err {
@@ -250,13 +254,13 @@ impl Error {
                 })
             }
             const_hex::FromHexError::OddLength => Error::LengthError(LengthError {
-                expected: N,
-                actual: len,
+                expected: expected,
+                actual: actual,
                 hash_name,
             }),
             const_hex::FromHexError::InvalidStringLength => Error::LengthError(LengthError {
-                expected: N,
-                actual: len,
+                expected: expected,
+                actual: actual,
                 hash_name,
             }),
         }

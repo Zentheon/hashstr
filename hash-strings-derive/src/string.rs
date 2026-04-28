@@ -120,7 +120,7 @@ impl StringWrapperRec {
                     let value = value.as_ref();
                     crate::check_len::<#con_int_x2>(value.as_ref(), #hash_name_str)?;
                     const_hex::check(value)
-                        .map_err(|e| crate::Error::from_hex_err::<#con_int>(e, value.len(), #hash_name_str))?;
+                        .map_err(|e| crate::Error::from_hex_err(e, value.len(), #con_int, #hash_name_str))?;
 
                     // SAFETY: Length and encoding has already been checked above.
                     Ok(Self(unsafe {

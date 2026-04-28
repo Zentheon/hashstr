@@ -17,6 +17,7 @@ pub fn impl_hash_string_tests(input: TokenStream) -> TokenStream {
     let ident = args.struct_ident(args.upper);
     let ident_lower = args.struct_ident(false);
     let ident_upper = args.struct_ident(true);
+    let hash_name = args.hash_name_str();
 
     let upper = args.upper;
     let con = args.unwrap_con();
@@ -174,6 +175,47 @@ pub fn impl_hash_string_tests(input: TokenStream) -> TokenStream {
                     // And finally, check uppercase
                     let found = upper.find(|c: char| crate::HEX_LETTERS_LOWER.contains(&{ c as u8 }));
                     assert!(found.is_none());
+                }
+            },
+        ),
+        (
+            "length_error",
+            quote! {
+                #[test]
+                fn length_error() {
+                    use digest::typenum::Unsigned;
+
+                    let too_long = [20u8; #con::USIZE + 10];
+                    let too_short = [20u8; #con::USIZE - 2];
+                    let res1 = #ident::try_from(too_long.as_slice());
+                    let res2 = #ident::encode_bytes(too_short.as_slice());
+
+                    match res1 {
+                        Err(crate::Error::LengthError(crate::LengthError {
+                            expected,
+                            actual,
+                            hash_name,
+                        })) => {
+                            println!("exp: {expected}, ac: {actual}, hash: {hash_name}");
+                            assert!(expected == #con::USIZE);
+                            assert!(actual == #con::USIZE + 10);
+                            assert!(hash_name == #hash_name)
+                        },
+                        _ => panic!("This should be a LengthError"),
+                    };
+
+                    match res2 {
+                        Err(crate::Error::LengthError(crate::LengthError {
+                            expected,
+                            actual,
+                            hash_name,
+                        })) => {
+                            assert!(expected == #con::USIZE);
+                            assert!(actual == #con::USIZE - 2);
+                            assert!(hash_name == #hash_name)
+                        },
+                        _ => panic!("This should be a LengthError"),
+                    };
                 }
             },
         ),
