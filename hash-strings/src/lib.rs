@@ -7,7 +7,6 @@
 
 use std::fmt::Display;
 
-use const_hex::encode_to_slice;
 use fstr::FStr;
 
 #[cfg(feature = "ascon-hash256")]
@@ -59,16 +58,108 @@ pub mod tiger;
 #[cfg(feature = "whirlpool")]
 pub mod whirlpool;
 
-/// Encodes a byte slice to an [`FStr`] in lowercase hexidecminal
-pub fn encode_lower_hex<const N: usize>(
+/// The table of lowercase letters (no numbers).
+pub const HEX_LETTERS_LOWER: &[u8; 6] = b"abcdef";
+
+/// The table of uppercase letters (no numbers).
+pub const HEX_LETTERS_UPPER: &[u8; 6] = b"ABCDEF";
+
+/// Takes a number of hexadecimal bytes and converts uppercase letters to lowercase.
+///
+/// This function only finds letters 'A' through 'F' and case-swaps them; it does not care if the
+/// input is properly encoded hex or not.
+pub const fn convert_hex_case<const N: usize, const TO_UPPER: bool>(hex: &[u8; N]) -> [u8; N] {
+    // Initial vars
+    let (search, replace) = if TO_UPPER {
+        (HEX_LETTERS_LOWER, HEX_LETTERS_UPPER)
+    } else {
+        (HEX_LETTERS_UPPER, HEX_LETTERS_LOWER)
+    };
+    debug_assert!(search.len() == replace.len());
+    let lookup_end = search.len() - 1;
+
+    let mut converted = [0u8; N];
+    let mut pos = 0;
+    let mut lookup = 0;
+
+    // Loop over chars in hex input
+    while pos < N {
+        // Try to find casing matches that should be swapped
+        while lookup <= lookup_end {
+            if hex[pos] == search[lookup] {
+                converted[pos] = replace[lookup];
+                break;
+            }
+            // End of lookup options: Copy current char
+            if lookup == lookup_end {
+                converted[pos] = hex[pos];
+            }
+            lookup += 1;
+        }
+        lookup = 0;
+        pos += 1;
+    }
+    converted
+}
+
+#[test]
+fn test_convert_hex_case() {
+    let hex1: &[u8; 6] = b"f2ad9a";
+    let hex2: &[u8; 12] = b"adFcAaaBCCfd";
+    let hex3: &[u8; 12] = b"AABBCCDDEEFF";
+
+    let upper1 = convert_hex_case::<6, true>(hex1);
+}
+
+pub const fn convert_hex_case_fstr<const N: usize, const TO_UPPER: bool>(hex: &FStr<N>) -> FStr<N> {
+    let hex_array = convert_hex_case::<N, TO_UPPER>(hex.as_bytes());
+    unsafe { FStr::from_inner_unchecked(hex_array) }
+}
+
+#[test]
+fn test_convert_hex_case_fstr() {
+    let hex1: FStr<6> = FStr::from_str_unwrap("f2ad9a");
+    let hex2: FStr<12> = FStr::from_str_unwrap("adFcAaaBCCfd");
+    let hex3: FStr<12> = FStr::from_str_unwrap("AABBCCDDEEFF");
+
+    println!("hex1: {hex1}");
+    println!("hex2: {hex2}");
+    println!("hex3: {hex3}");
+    println!("hex array: {:?}", hex3.as_bytes().as_array::<12>().unwrap());
+
+    let lower_array = convert_hex_case::<12, true>(&hex3.as_bytes());
+    let lower1 = convert_hex_case_fstr::<6, false>(&hex1);
+    let upper1 = convert_hex_case_fstr::<6, true>(&hex1);
+
+    println!("lower1: {lower1}");
+    println!("hex array to lower: {:?}", lower_array);
+
+    assert!(upper1 != lower1);
+    assert!(upper1 == lower1.to_uppercase());
+}
+
+/// Encodes a byte slice to an [`FStr`] in hexadecimal
+///
+/// # Args
+/// * `value`: The data to encode.
+/// * `upper`: Encodes to uppercase hex if `true`.
+/// * `hash_name`: Name of the hasher to use in an error.
+pub fn encode_hex<const N: usize>(
     value: impl AsRef<[u8]>,
+    upper: bool,
     hash_name: &'static str,
 ) -> Result<FStr<N>, Error> {
     let value = value.as_ref();
     let mut hex = [0u8; _];
 
     assert!(hex.len() == 2 * value.len());
-    match encode_to_slice(value, &mut hex) {
+
+    let encode = if upper {
+        const_hex::encode_to_slice_upper(value, &mut hex)
+    } else {
+        const_hex::encode_to_slice(value, &mut hex)
+    };
+    match encode {
         // SAFETY: Must be valid utf-8. Should already be well within bounds after the hex
         // encode
         Ok(_) => Ok(unsafe { FStr::from_inner_unchecked(hex) }),
@@ -76,9 +167,13 @@ pub fn encode_lower_hex<const N: usize>(
     }
 }
 
-/// Encodes a byte slice to an [`FStr`] in lowercase hexidecminal
-pub const fn encode_lower_hex_const<const N: usize>(value: &[u8; N]) -> FStr<N> {
-    let buf = const_hex::const_encode::<N, false>(value);
+/// Encodes a byte slice to an [`FStr`] in lowercase hexidecimal
+pub const fn encode_hex_const<const N: usize, const UPPER: bool>(value: &[u8; N]) -> FStr<N> {
+    let buf: const_hex::Buffer<N> = if UPPER {
+        const_hex::Buffer::new().const_format_upper(value)
+    } else {
+        const_hex::Buffer::new().const_format(value)
+    };
     // SAFETY: Must be valid utf-8. Should already be well within bounds after the hex
     // encode
     unsafe { FStr::from_inner_unchecked(*buf.as_byte_array()) }

@@ -1,6 +1,7 @@
 use darling::FromDeriveInput;
 use proc_macro2::TokenStream;
 use quote::{ToTokens, quote};
+use syn::Ident;
 
 use crate::Args;
 
@@ -17,7 +18,6 @@ pub struct StringDigestRec {
     #[darling(flatten)]
     attr: Args,
 }
-
 impl ToTokens for StringDigestRec {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let StringDigestRec {
@@ -26,9 +26,17 @@ impl ToTokens for StringDigestRec {
             // ref data,
             ref attr,
         } = *self;
+        tokens.extend(Self::generate(ident, attr))
+    }
+}
 
-        let hasher = attr.unwrap_hasher();
-        let digest = attr.unwrap_digest();
+impl StringDigestRec {
+    pub fn generate(ident: &Ident, args: &Args) -> TokenStream {
+        let mut tokens = TokenStream::new();
+
+        let digest = args.digest();
+        let digest_reader = args.digest_reader();
+        let digest_file = args.digest_file();
 
         // let (imp, ty, wher) = generics.split_for_impl();
 
@@ -41,27 +49,12 @@ impl ToTokens for StringDigestRec {
             impl #ident {
                 /// Digest some raw data and produce a hash.
                 pub fn digest(data: impl AsRef<[u8]>) -> Self {
-                    use #digest;
-
-                    let hash = #hasher::digest(data).into();
+                    #digest
 
                     #[cfg(feature = "tracing")]
                     tracing::trace!(%hash, "Generated a hash of raw data");
                     hash
                 }
-            }
-        });
-
-        let (io_init, io_finalize) = if attr.no_io_wrapper.is_present() {
-            (quote!(#hasher::new()), quote!(hasher.finalize()))
-        } else {
-            (
-                quote!(digest_io::IoWrapper(#hasher::new())),
-                quote!(hasher.0.finalize()),
-            )
-        };
-        tokens.extend(quote! {
-            impl #ident {
                 /// Attempts to digest the entirety of the given reader.
                 ///
                 /// Returns errors produced by [`std::io::copy`]
@@ -70,11 +63,7 @@ impl ToTokens for StringDigestRec {
                     R: Sized,
                     R: std::io::Read,
                 {
-                    use #digest;
-
-                    let mut hasher = #io_init;
-                    let digested = std::io::copy(read, &mut hasher)?;
-                    let hash = #io_finalize.into();
+                    #digest_reader
 
                     #[cfg(feature = "tracing")]
                     tracing::trace!(digested, %hash, "Generated the hash of content in a reader");
@@ -85,12 +74,7 @@ impl ToTokens for StringDigestRec {
                 ///
                 /// Returns errors produced by [`std::fs::File::open`] and [`std::io::copy`]
                 pub fn digest_file(path: impl AsRef<std::path::Path>) -> Result<Self, std::io::Error> {
-                    use #digest;
-
-                    let mut file = std::fs::File::open(path.as_ref())?;
-                    let mut hasher = #io_init;
-                    let digested = std::io::copy(&mut file, &mut hasher)?;
-                    let hash = #io_finalize.into();
+                    #digest_file
 
                     #[cfg(feature = "tracing")]
                     tracing::trace!(digested, %hash, path = ?path.as_ref(), "Generated the hash of a file");
@@ -99,5 +83,6 @@ impl ToTokens for StringDigestRec {
                 }
             }
         });
+        tokens
     }
 }

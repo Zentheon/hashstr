@@ -1,39 +1,105 @@
-use crate::{EncodingError, Error};
-use blake2::{Blake2b512, Blake2s256, Digest, digest::generic_array::GenericArray};
+use blake2::{Blake2b512, Blake2s256, digest::generic_array::GenericArray};
 use digest::consts::{U32, U64};
-use hash_strings_derive::{StringDigest, StringWrapper, impl_hash_string_tests};
+use hash_strings_derive::impl_hash_string;
 
-#[derive(Clone, Debug, Eq, StringDigest, StringWrapper)]
-#[hash_strings(hasher = Blake2s256, con = U32, digest = Digest, no_io_wrapper)]
-pub struct Blake2s256String(fstr::FStr<64>);
+impl_hash_string!(
+    hasher = blake2::Blake2s256,
+    con = U32,
+    digest = "
+        use blake2::Digest;
 
-#[derive(Clone, Debug, Eq, StringDigest, StringWrapper)]
-#[hash_strings(hasher = Blake2b512, con = U64, digest = Digest, no_io_wrapper)]
-pub struct Blake2b512String(fstr::FStr<128>);
+        let mut hasher = Blake2s256::new();
+        hasher.update(data.as_ref());
+        let hash = Self::from(hasher.finalize());
+    ",
+    digest_reader = "
+        use blake2::Digest;
+
+        let mut hasher = Blake2s256::new();
+        let digested = std::io::copy(read, &mut hasher)?;
+        let hash = Self::from(hasher.finalize());
+    ",
+    digest_file = "
+        use blake2::Digest;
+
+        let mut file = std::fs::File::open(path.as_ref())?;
+        let mut hasher = Blake2s256::new();
+        let digested = std::io::copy(&mut file, &mut hasher)?;
+        let hash = Self::from(hasher.finalize());
+    ",
+);
+
+impl_hash_string!(
+    hasher = blake2::Blake2b512,
+    con = U64,
+    digest = "
+    use blake2::Digest;
+
+    let mut hasher = Blake2b512::new();
+    hasher.update(data.as_ref());
+    let hash = Self::from(hasher.finalize());
+",
+    digest_reader = "
+    use blake2::Digest;
+
+    let mut hasher = Blake2b512::new();
+    let digested = std::io::copy(read, &mut hasher)?;
+    let hash = Self::from(hasher.finalize());
+",
+    digest_file = "
+    use blake2::Digest;
+
+    let mut file = std::fs::File::open(path.as_ref())?;
+    let mut hasher = Blake2b512::new();
+    let digested = std::io::copy(&mut file, &mut hasher)?;
+    let hash = Self::from(hasher.finalize());
+",
+);
 
 impl From<&GenericArray<u8, U32>> for Blake2s256String {
-    fn from(digest: &GenericArray<u8, U32>) -> Self {
-        Self(base16ct::lower::encode_string(digest).try_into().unwrap())
+    fn from(value: &GenericArray<u8, U32>) -> Self {
+        Self::encode_bytes(value).unwrap()
     }
 }
 
 impl From<GenericArray<u8, U32>> for Blake2s256String {
-    fn from(digest: GenericArray<u8, U32>) -> Self {
-        Self::from(&digest)
+    fn from(value: GenericArray<u8, U32>) -> Self {
+        Self::encode_bytes(value).unwrap()
+    }
+}
+
+impl From<&GenericArray<u8, U32>> for Blake2s256StringUpper {
+    fn from(value: &GenericArray<u8, U32>) -> Self {
+        Self::encode_bytes(value).unwrap()
+    }
+}
+
+impl From<GenericArray<u8, U32>> for Blake2s256StringUpper {
+    fn from(value: GenericArray<u8, U32>) -> Self {
+        Self::encode_bytes(value).unwrap()
     }
 }
 
 impl From<&GenericArray<u8, U64>> for Blake2b512String {
-    fn from(digest: &GenericArray<u8, U64>) -> Self {
-        Self(base16ct::lower::encode_string(digest).try_into().unwrap())
+    fn from(value: &GenericArray<u8, U64>) -> Self {
+        Self::encode_bytes(value).unwrap()
     }
 }
 
 impl From<GenericArray<u8, U64>> for Blake2b512String {
-    fn from(digest: GenericArray<u8, U64>) -> Self {
-        Self::from(&digest)
+    fn from(value: GenericArray<u8, U64>) -> Self {
+        Self::encode_bytes(value).unwrap()
     }
 }
 
-impl_hash_string_tests!(hasher = Blake2s256, con = U32,);
-impl_hash_string_tests!(hasher = Blake2b512, con = U64,);
+impl From<&GenericArray<u8, U64>> for Blake2b512StringUpper {
+    fn from(value: &GenericArray<u8, U64>) -> Self {
+        Self::encode_bytes(value).unwrap()
+    }
+}
+
+impl From<GenericArray<u8, U64>> for Blake2b512StringUpper {
+    fn from(value: GenericArray<u8, U64>) -> Self {
+        Self::encode_bytes(value).unwrap()
+    }
+}
