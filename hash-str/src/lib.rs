@@ -203,11 +203,35 @@ pub struct LengthError {
     pub(crate) hash_name: &'static str,
 }
 
+impl LengthError {
+    pub const fn expected(&self) -> usize {
+        self.expected
+    }
+    pub const fn actual(&self) -> usize {
+        self.actual
+    }
+    pub const fn hash_name(&self) -> &'static str {
+        self.hash_name
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct HexError {
-    pub(crate) c: char,
+    pub(crate) char: char,
     pub(crate) index: usize,
     pub(crate) hash_name: &'static str,
+}
+
+impl HexError {
+    pub const fn char(&self) -> char {
+        self.char
+    }
+    pub const fn index(&self) -> usize {
+        self.index
+    }
+    pub const fn hash_name(&self) -> &'static str {
+        self.hash_name
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -248,7 +272,7 @@ impl Error {
         match err {
             const_hex::FromHexError::InvalidHexCharacter { c, index } => {
                 Error::HexError(HexError {
-                    c,
+                    char: c,
                     index,
                     hash_name,
                 })
