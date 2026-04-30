@@ -14,7 +14,6 @@ pub fn impl_hash_str(input: TokenStream) -> TokenStream {
 
     let con = args.unwrap_con();
     let hasher = args.hasher_ident();
-    let path = args.hasher.as_ref().unwrap();
     let hash_name = args.hash_name_str();
 
     let mut expanded = quote!();

@@ -4,7 +4,7 @@ use darling::FromMeta;
 use proc_macro_error::abort;
 use proc_macro2::{Span, TokenStream};
 use quote::quote;
-use syn::{Ident, LitBool, LitStr, Path};
+use syn::{Ident, LitStr, Path};
 
 use crate::ident;
 
@@ -42,13 +42,6 @@ pub(crate) struct Args {
 }
 
 impl Args {
-    pub fn unwrap_hasher(&self) -> Path {
-        if let Some(hasher) = &self.hasher {
-            hasher.clone()
-        } else {
-            abort!(self.hasher, "hasher attribute must be set")
-        }
-    }
     pub fn digest(&self) -> TokenStream {
         let hasher = self.hasher_ident();
         match &self.digest {
@@ -101,20 +94,6 @@ impl Args {
             abort!(self.hasher, "hasher attribute must be set")
         }
     }
-    pub fn unwrap_hasher_crate(&self) -> Ident {
-        if let Some(hasher_crate) = &self.hasher_crate {
-            hasher_crate.clone()
-        } else {
-            abort!(self.hasher_crate, "hasher_crate attribute must be set")
-        }
-    }
-    pub fn hash_name(&self) -> String {
-        if let Some(name) = &self.hash_name {
-            name.to_string()
-        } else {
-            self.hasher_ident().to_string()
-        }
-    }
     pub fn hash_name_str(&self) -> LitStr {
         if let Some(ident) = &self.hash_name {
             LitStr::new(ident, Span::call_site())
@@ -126,9 +105,6 @@ impl Args {
                 "Either hasher or hash_name attribute must be set"
             )
         }
-    }
-    pub fn hasher_crate_str(&self) -> LitStr {
-        LitStr::new(&self.unwrap_hasher_crate().to_string(), Span::call_site())
     }
     pub fn unwrap_con(&self) -> Ident {
         if let Some(con) = &self.con {
@@ -187,8 +163,5 @@ impl Args {
     }
     pub fn casing(&self) -> &str {
         if self.upper { "upper" } else { "lower" }
-    }
-    pub fn is_upper(&self) -> LitBool {
-        LitBool::new(self.upper, proc_macro2::Span::call_site())
     }
 }
