@@ -184,9 +184,10 @@ pub fn impl_hash_str_tests(input: TokenStream) -> TokenStream {
                 #[test]
                 fn length_error() {
                     use digest::typenum::Unsigned;
+                    const N: usize = #con::USIZE;
 
-                    let too_long = [20u8; #con::USIZE + 10];
-                    let too_short = [20u8; #con::USIZE - 2];
+                    let too_long = [20u8; N + 10];
+                    let too_short = [20u8; N - 2];
                     let res1 = #ident::try_from(too_long.as_slice());
                     let res2 = #ident::encode_bytes(too_short.as_slice());
 
@@ -196,10 +197,9 @@ pub fn impl_hash_str_tests(input: TokenStream) -> TokenStream {
                             actual,
                             hash_name,
                         })) => {
-                            println!("exp: {expected}, ac: {actual}, hash: {hash_name}");
-                            assert!(expected == #con::USIZE);
-                            assert!(actual == #con::USIZE + 10);
-                            assert!(hash_name == #hash_name)
+                            assert!(expected == N);
+                            assert!(actual == N + 10);
+                            assert!(hash_name == #hash_name);
                         },
                         _ => panic!("This should be a LengthError"),
                     };
@@ -210,11 +210,55 @@ pub fn impl_hash_str_tests(input: TokenStream) -> TokenStream {
                             actual,
                             hash_name,
                         })) => {
-                            assert!(expected == #con::USIZE);
-                            assert!(actual == #con::USIZE - 2);
-                            assert!(hash_name == #hash_name)
+                            assert!(expected == N);
+                            assert!(actual == N - 2);
+                            assert!(hash_name == #hash_name);
                         },
                         _ => panic!("This should be a LengthError"),
+                    };
+                }
+            },
+        ),
+        (
+            "hex_error",
+            quote! {
+                #[test]
+                fn hex_error() {
+                    use digest::typenum::Unsigned;
+                    const HEX_LEN: usize = #con::USIZE * 2;
+
+                    let oops_all_z = fstr::FStr::<HEX_LEN>::from_ascii_filler(b'z');
+                    let mut slice = fstr::FStr::<HEX_LEN>::from_ascii_filler(b'a').into_inner();
+                    slice[HEX_LEN / 2] = 'g' as u8;
+                    let single_bad_char = fstr::FStr::from_inner(slice).unwrap();
+
+                    let res1 = #ident::try_from(oops_all_z);
+                    let res2 = #ident::from_hex(single_bad_char);
+
+                    match res1 {
+                        Err(crate::Error::HexError(crate::HexError {
+                            char,
+                            index,
+                            hash_name,
+                        })) => {
+                            assert!(char == 'z');
+                            assert!(index == 0);
+                            assert!(hash_name == #hash_name);
+                        },
+                        _ => panic!("This should be a HexError"),
+                    };
+
+                    match res2 {
+                        Err(crate::Error::HexError(crate::HexError {
+                            char,
+                            index,
+                            hash_name,
+                        })) => {
+                            assert!(char == 'g');
+                            assert!(index == HEX_LEN / 2);
+                            assert!(hash_name == #hash_name);
+                        },
+                        _ => panic!("This should be a HexError"),
                     };
                 }
             },

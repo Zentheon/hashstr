@@ -272,9 +272,11 @@ impl StrWrapperRec {
                 }
             }
 
-            impl From<&fstr::FStr<#con_int>> for #ident {
-                fn from(value: &fstr::FStr<#con_int>) -> Self {
-                    Self::encode_bytes(value).unwrap()
+            impl TryFrom<fstr::FStr<#con_int_x2>> for #ident {
+                type Error = crate::Error;
+
+                fn try_from(value: fstr::FStr<#con_int_x2>) -> Result<Self, Self::Error> {
+                    Self::from_hex(value)
                 }
             }
 
