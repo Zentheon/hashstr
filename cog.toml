@@ -9,8 +9,10 @@ branch_whitelist = []
 skip_ci = "[skip ci]"
 skip_untracked = false
 pre_bump_hooks = [
-    "sed -i '/^version = \"/ cversion = \"{{version}}\"' crate/Cargo.toml",
-    "cargo check --manifest-path crate/Cargo.toml",
+    "cargo check",
+    "cargo test --all-features",
+    "sed -i '/^version = \"/ cversion = \"{{version}}\"' hash-str-derive/Cargo.toml",
+    "sed -i '/^version = \"/ cversion = \"{{version}}\"' hash-str/Cargo.toml",
 ]
 post_bump_hooks = []
 pre_package_bump_hooks = []
