@@ -1,9 +1,9 @@
 use digest::{consts::U20, typenum::Unsigned};
 use fstr::FStr;
-use hash_str_derive::{impl_hash_str_tests, HashStrWrapper};
+use hash_str_derive::{HashStrWrapper, impl_hash_str_tests};
 use sha1_checked::{
-    digest::{generic_array::GenericArray, DynDigest},
     Sha1,
+    digest::{DynDigest, generic_array::GenericArray},
 };
 
 macro_rules! impl_sha1_checked  {
@@ -102,7 +102,7 @@ macro_rules! impl_sha1_checked  {
     }
 }
 
-/// Reimplementation of the [`sha1_checked::CollisionResult`] for [`Sha1CheckedString`]
+/// Reimplementation of the [`sha1_checked::CollisionResult`] for [`Sha1CheckedStr`]
 ///
 /// This enum implements `From<sha1_checked::CollisionResult>`
 #[derive(Debug)]
@@ -116,7 +116,7 @@ pub enum CollisionResult<T> {
 }
 
 impl<T> CollisionResult<T> {
-    /// Returns the string-wrapped output hash.
+    /// Returns the fstr-wrapped output hash.
     pub fn hash(&self) -> &T {
         match self {
             CollisionResult::Ok(hash) => hash,
@@ -125,7 +125,7 @@ impl<T> CollisionResult<T> {
         }
     }
 
-    /// Consumes result and returns the string-wrapped output hash.
+    /// Consumes result and returns the fstr-wrapped output hash.
     pub fn take_hash(self) -> T {
         match self {
             CollisionResult::Ok(hash) => hash,
@@ -142,14 +142,14 @@ impl<T> CollisionResult<T> {
 
 #[derive(Debug, Clone, Eq, HashStrWrapper)]
 #[hash_str(hash_name = "Sha1Checked", con = U20)]
-pub struct Sha1CheckedString(FStr<{ U20::USIZE * 2 }>);
+pub struct Sha1CheckedStr(FStr<{ U20::USIZE * 2 }>);
 
-impl_sha1_checked!(Sha1CheckedString);
+impl_sha1_checked!(Sha1CheckedStr);
 
 #[derive(Debug, Clone, Eq, HashStrWrapper)]
 #[hash_str(hash_name = "Sha1Checked", con = U20, upper)]
-pub struct Sha1CheckedStringUpper(FStr<{ U20::USIZE * 2 }>);
+pub struct Sha1CheckedStrUpper(FStr<{ U20::USIZE * 2 }>);
 
-impl_sha1_checked!(Sha1CheckedStringUpper);
+impl_sha1_checked!(Sha1CheckedStrUpper);
 
 impl_hash_str_tests!(hasher = Sha1, hash_name = "Sha1Checked", con = U20,);

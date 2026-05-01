@@ -139,9 +139,9 @@ impl Args {
             .clone()
             .unwrap_or(self.hasher_ident().to_string());
         if upper {
-            ident!("{base}StringUpper")
+            ident!("{base}StrUpper")
         } else {
-            ident!("{base}String")
+            ident!("{base}Str")
         }
     }
     pub fn struct_path(&self, upper: bool) -> Path {
@@ -156,9 +156,9 @@ impl Args {
             .unwrap_or(self.hasher_ident().to_string())
             .to_lowercase();
         if upper {
-            ident!("{base}_string_upper")
+            ident!("{base}_str_upper")
         } else {
-            ident!("{base}_string")
+            ident!("{base}_str")
         }
     }
     pub fn casing(&self) -> &str {

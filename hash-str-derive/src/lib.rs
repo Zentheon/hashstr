@@ -20,7 +20,7 @@ mod hashing;
 
 #[proc_macro_derive(HashStrDigest, attributes(hash_str))]
 #[proc_macro_error]
-pub fn derive_string_digest(ts: TokenStream) -> TokenStream {
+pub fn derive_str_digest(ts: TokenStream) -> TokenStream {
     let input = parse_macro_input!(ts as DeriveInput);
     let receiver = hashing::HashStrDigestRec::from_derive_input(&input).unwrap();
     let tokens = quote!(#receiver);
@@ -31,7 +31,7 @@ mod string;
 
 #[proc_macro_derive(HashStrWrapper, attributes(hash_str))]
 #[proc_macro_error]
-pub fn derive_string_wrapper(ts: TokenStream) -> TokenStream {
+pub fn derive_str_wrapper(ts: TokenStream) -> TokenStream {
     let input = parse_macro_input!(ts as DeriveInput);
     let receiver = string::StrWrapperRec::from_derive_input(&input).unwrap();
     let tokens = quote!(#receiver);
