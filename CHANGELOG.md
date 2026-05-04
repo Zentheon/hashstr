@@ -2,6 +2,17 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## 0.2.0 - 2026-05-04
+
+#### Documentation
+- 3ab22c90c757f695656cb5b1b3518f09ba0e627e - **(readme)** correct README.md relative path in `hash-str` root - @Zentheon
+#### Miscellaneous Chores
+- 53667d47ff6f164c5cb34c43765ae571601779a1 - **(deps)** use published version of `hash-str-derive` in `hash-str` - @Zentheon
+#### Refactoring
+- daec01a4fa54cca1b2c466138ad9f6a74ca465cd - **(rename)** apparently I did not make sure "hash-str" was not in - @Zentheon
+
+- - -
+
 ## 0.1.0 - 2026-05-01
 
 First release!!! ✨
