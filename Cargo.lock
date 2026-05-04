@@ -367,7 +367,7 @@ dependencies = [
 
 [[package]]
 name = "hashstr"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "ascon-hash256",
  "base16ct",
@@ -408,7 +408,7 @@ dependencies = [
 
 [[package]]
 name = "hashstr-derive"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "darling",
  "proc-macro-error",
