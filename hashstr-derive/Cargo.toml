@@ -1,0 +1,20 @@
+[package]
+authors = ["Zentheon <zentheon@mailbox.org>"]
+edition = "2024"
+name = "hashstr-derive"
+description = "Derive macro magic behind the hashstr crate"
+version = "0.1.0"
+readme = "../README.md"
+repository = "https://github.com/Zentheon/hashstr"
+homepage = "https://github.com/Zentheon/hashstr"
+license-file = "../LICENSE"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+quote = "1.0"
+syn = { version = "2.0", features = ["full"] }
+proc-macro2 = "1.0"
+darling = "0.23.0"
+proc-macro-error = "1.0.4"

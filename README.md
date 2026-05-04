@@ -1,26 +1,26 @@
-# What is *hash-str*
+# What is *hashstr*
 > Convenient [`str`]-like types that wrap the various [RustCrypto: Hashes](https://github.com/RustCrypto/hashes).
 
 RustCrypto is a great project that offers up a bunch of Rusty hashing algorithms under one nice, unified API. One small problem: It requires moderate brain use to convert the types around in a portable manor. This simply cannot stand! Where is the Python-level convenience?
 
-Enter `hash-str`, a single crate that wraps most RustCrypto hashers in types that behave as close to regular 'ol [`str`]s as possible but with the added benefit of content digesting-related methods, improved efficiency and an additional coat of type enforcement paint.
+Enter `hashstr`, a single crate that wraps most RustCrypto hashers in types that behave as close to regular 'ol [`str`]s as possible but with the added benefit of content digesting-related methods, improved efficiency and an additional coat of type enforcement paint.
 
 # Usage
-Pick out the algorithm that suits your needs. `hash-str` does not enable any hasher types by default, so we'll go with [`sha2`](https://docs.rs/sha2/latest) for demonstration, but usage is unanimous across ~~all~~ **most** variants.
+Pick out the algorithm that suits your needs. `hashstr` does not enable any hasher types by default, so we'll go with [`sha2`](https://docs.rs/sha2/latest) for demonstration, but usage is unanimous across ~~all~~ **most** variants.
 
 Add to your Cargo.toml:
 ```toml
-hash-str = { version = "0.1", features = ["sha2"] }
+hashstr = { version = "0.1", features = ["sha2"] }
 ```
 or run:
 ```bash
-cargo add -F sha2 hash-str 
+cargo add -F sha2 hashstr 
 ```
 
 ## Digest
 there are currently 3 methods available to quickly obtain a hash of some data:
 ```rust
-use hash_str::sha2::Sha256Str;
+use hashstr::sha2::Sha256Str;
 
 fn main() -> std::io::Result<()> {
     let hash1 = Sha256Str::digest(b"abc");
@@ -41,7 +41,7 @@ fn main() -> std::io::Result<()> {
 ## Casing
 Hash strings are lowercase by default. Every type has an `*Upper` variant:
 ```rust
-use hash_str::sha2::{ Sha224Str, Sha224StrUpper };
+use hashstr::sha2::{ Sha224Str, Sha224StrUpper };
 
 let data = b"Tasty data";
 
@@ -53,9 +53,9 @@ assert!(hash_upper == "62B0D0B4104870095C7E3BBFD470B828C4E9EDFE46D26D04F9DC799F"
 ```
 
 ## Conversion
-Say you already used a hasher directly to obtain one of the somewhat cryptic const array outputs. Its `hash-str` counterpart implements `From` traits for them:
+Say you already used a hasher directly to obtain one of the somewhat cryptic const array outputs. Its `hashstr` counterpart implements `From` traits for them:
 ```rust
-use hash_str::sha2::Sha512Str;
+use hashstr::sha2::Sha512Str;
 use sha2::digest::Digest;
 
 let mut hasher = sha2::Sha512::new();
@@ -74,13 +74,13 @@ fn default() -> Self {
 ```
 This results in the hash of digesting exactly nothing. In the case of [`sha2::Sha256`](https://docs.rs/sha2/0.11.0/sha2/struct.Sha224.html) specifically...
 ```rust
-use hash_str::sha2::Sha256Str;
+use hashstr::sha2::Sha256Str;
 
 assert!(Sha256Str::default() == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
 ```
 
 ## Efficiency
-`hash-str`s aren't just convenient, they're efficient!
+`hashstr`s aren't just convenient, they're efficient!
 
 * All types wrap [fstr](https://docs.rs/fstr/0.2.18/fstr/) under the hood, which allows for fixed-sized [`str`]-likes. 
 * Encoding is done with [`const_hex`](https://docs.rs/const-hex/latest)

@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
 members = [
-    "hash-str",
-    "hash-str-derive",
+    "hashstr",
+    "hashstr-derive",
 ]

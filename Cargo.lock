@@ -366,7 +366,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "hash-str"
+name = "hashstr"
 version = "0.1.0"
 dependencies = [
  "ascon-hash256",
@@ -384,7 +384,7 @@ dependencies = [
  "generic-array 1.4.1",
  "gost94",
  "groestl",
- "hash-str-derive 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "hashstr-derive",
  "hybrid-array",
  "jh",
  "kupyna",
@@ -407,21 +407,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "hash-str-derive"
+name = "hashstr-derive"
 version = "0.1.0"
-dependencies = [
- "darling",
- "proc-macro-error",
- "proc-macro2",
- "quote",
- "syn 2.0.117",
-]
-
-[[package]]
-name = "hash-str-derive"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7aca9eac676a38aedb07bedb94f0279c2e9e6be9e5bb3599f16196b54561cc52"
 dependencies = [
  "darling",
  "proc-macro-error",
