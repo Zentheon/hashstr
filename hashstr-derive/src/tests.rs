@@ -4,7 +4,8 @@ use proc_macro::TokenStream;
 use proc_macro_error::abort;
 use quote::quote;
 
-use crate::ident;
+use crate::args::EncodingType;
+use crate::{Args, ident};
 
 pub fn impl_hashstr_tests(input: TokenStream) -> TokenStream {
     let args: crate::Args = match syn::parse(input) {
@@ -13,16 +14,20 @@ pub fn impl_hashstr_tests(input: TokenStream) -> TokenStream {
             return e.to_compile_error().into();
         }
     };
+    generate_tests(&args).into()
+}
 
-    let ident = args.struct_ident(args.upper);
-    let ident_lower = args.struct_ident(false);
-    let ident_upper = args.struct_ident(true);
+/// For use with already-parsed args.
+pub fn generate_tests(args: &Args) -> proc_macro2::TokenStream {
+    let ident = args.struct_ident(args.encoding);
+    let ident_lower = args.struct_ident(EncodingType::LowerHex);
+    let ident_upper = args.struct_ident(EncodingType::UpperHex);
     let hash_name = args.hash_name_str();
 
-    let upper = args.upper;
+    let upper = args.is_upper();
     let con = args.unwrap_con();
 
-    let mod_ident = ident!("{}_tests", args.struct_snake(args.upper));
+    let mod_ident = ident!("{}_tests", args.struct_snake(args.encoding));
 
     // Individually mapped tests, so they can be selectively ignored by the macro call
     let tests = vec![
@@ -264,23 +269,29 @@ pub fn impl_hashstr_tests(input: TokenStream) -> TokenStream {
             },
         ),
     ];
+
+    // Ignore specific tests based on encoding
+    let ignored_tests: Vec<String> = args.ignore_tests.iter().map(|s| s.value()).collect();
+    let mut ignored_tests: Vec<&str> = ignored_tests.iter().map(|s| s.as_str()).collect();
+    if args.is_base64() && !ignored_tests.contains(&"casing") {
+        ignored_tests.push("casing");
+    }
+    if args.is_base64() && !ignored_tests.contains(&"hex_error") {
+        ignored_tests.push("hex_error");
+    }
+
     // Parse the tests to include using a provided ignore list
     let mut tests_stream = quote!();
     let mut known_names: Vec<&str> = vec![];
     for (name, stream) in tests {
         known_names.push(name);
 
-        if !args
-            .ignore_tests
-            .iter()
-            .find(|s| s.value() == name)
-            .is_some()
-        {
+        if !ignored_tests.contains(&name) {
             tests_stream.extend(stream);
         }
     }
     // Throw an error if a test in the ignored list isn't real
-    for ignored in args.ignore_tests {
+    for ignored in &args.ignore_tests {
         if !known_names.contains(&ignored.value().as_str()) {
             abort!(ignored, "Test '{}' does not exist", ignored.value())
         }

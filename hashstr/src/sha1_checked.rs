@@ -147,7 +147,7 @@ pub struct Sha1CheckedStr(FStr<{ U20::USIZE * 2 }>);
 impl_sha1_checked!(Sha1CheckedStr);
 
 #[derive(Debug, Clone, Eq, HashStrWrapper)]
-#[hashstr(hash_name = "Sha1Checked", con = U20, upper)]
+#[hashstr(hash_name = "Sha1Checked", con = U20, encoding = "upper_hex")]
 pub struct Sha1CheckedStrUpper(FStr<{ U20::USIZE * 2 }>);
 
 impl_sha1_checked!(Sha1CheckedStrUpper);

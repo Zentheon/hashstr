@@ -24,7 +24,7 @@ use hashstr_derive::{HashStrDigest, HashStrWrapper, impl_hashstr_tests};
 pub struct Blake3Str(fstr::FStr<64>);
 
 #[derive(Clone, Debug, Eq, HashStrWrapper, HashStrDigest)]
-#[hashstr(hasher = blake3::Hash, con = U32, hash_name = "Blake3", upper,
+#[hashstr(hasher = blake3::Hash, con = U32, hash_name = "Blake3", encoding = "upper_hex",
     digest = "
         let mut hasher = Hasher::new();
         hasher.update(data.as_ref());

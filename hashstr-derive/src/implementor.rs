@@ -1,7 +1,7 @@
 use proc_macro::TokenStream;
 use quote::{TokenStreamExt, quote};
 
-use crate::{Args, hashing::HashStrDigestRec, string::StrWrapperRec};
+use crate::{Args, args::EncodingType, hashing::HashStrDigestRec, string::StrWrapperRec};
 
 /// Generates impls for the simplest of hashers that don't require anything special
 pub fn impl_hashstr(input: TokenStream) -> TokenStream {
@@ -13,22 +13,30 @@ pub fn impl_hashstr(input: TokenStream) -> TokenStream {
     };
 
     let con = args.unwrap_con();
-    let hasher = args.hasher_ident();
     let hash_name = args.hash_name_str();
 
     let mut expanded = quote!();
-    for i in 0..2 {
-        let upper = i == 1;
-        args.upper = upper;
-        let casing = args.casing();
-        let ident = args.struct_ident(upper);
-        let struct_path = args.struct_path(upper);
+    for encoding in EncodingType::iterator() {
+        if let EncodingType::Base64 = encoding {
+            continue; // todo
+        }
+
+        args.encoding = encoding;
+        let ident = args.struct_ident(encoding);
+        let struct_path = args.struct_path(encoding);
+
+        let type_doc = match encoding {
+            EncodingType::LowerHex => "lowercase hex-encoded",
+            EncodingType::UpperHex => "uppercase hex-encoded",
+            EncodingType::Base64 => "base64-encoded",
+        };
 
         let hashing_impl = HashStrDigestRec::generate(&ident, &args);
         let wrapper_impl = StrWrapperRec::generate(&ident, &args);
+        let tests = crate::generate_tests(&args);
 
         expanded.append_all(quote! {
-            #[doc = concat!("A [`str`]-like, ", #casing, "case hex-encoded representation of a [`", #hash_name, "`] hash.")]
+            #[doc = concat!("A [`str`]-like, ", #type_doc, "representation of a [`", #hash_name, "`] hash.")]
             ///
             /// # Usage
             /// ```rust
@@ -57,8 +65,7 @@ pub fn impl_hashstr(input: TokenStream) -> TokenStream {
             }>);
             #wrapper_impl
             #hashing_impl
-
-            hashstr_derive::impl_hashstr_tests!(hasher = #hasher, con = #con, upper = #upper);
+            #tests
         });
     }
 

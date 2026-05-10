@@ -64,7 +64,7 @@ pub const HEX_LETTERS_LOWER: &[u8; 6] = b"abcdef";
 /// The table of uppercase letters (no numbers).
 pub const HEX_LETTERS_UPPER: &[u8; 6] = b"ABCDEF";
 
-/// Takes a number of hexadecimal bytes and converts uppercase letters to lowercase.
+/// Takes a number of hexadecimal bytes and converts their casing.
 ///
 /// This function only finds letters 'A' through 'F' and case-swaps them; it does not care if the
 /// input is properly encoded hex or not.

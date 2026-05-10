@@ -35,7 +35,7 @@ impl StrWrapperRec {
         let mut tokens = TokenStream::new();
 
         let hash_name_str = args.hash_name_str();
-        let upper = args.upper;
+        let upper = args.is_upper();
         let casing = args.casing();
 
         let con = args.unwrap_con();

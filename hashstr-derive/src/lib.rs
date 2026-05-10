@@ -39,6 +39,7 @@ pub fn derive_str_wrapper(ts: TokenStream) -> TokenStream {
 }
 
 mod tests;
+use crate::tests::generate_tests;
 
 /// Generates tests for a single hash str type.
 ///

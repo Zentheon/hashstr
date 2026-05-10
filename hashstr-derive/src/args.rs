@@ -3,11 +3,39 @@ use std::str::FromStr;
 use darling::FromMeta;
 use proc_macro_error::abort;
 use proc_macro2::{Span, TokenStream};
-use quote::quote;
+use quote::{ToTokens, quote};
 use syn::{Ident, LitStr, Path};
 
 use crate::ident;
 
+#[derive(Debug, Default, Copy, Clone, Eq, PartialEq, FromMeta)]
+pub(crate) enum EncodingType {
+    #[default]
+    LowerHex,
+    UpperHex,
+    Base64,
+}
+
+impl ToTokens for EncodingType {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        let extend = match self {
+            EncodingType::LowerHex => quote!(LowerHex),
+            EncodingType::UpperHex => quote!(UpperHex),
+            EncodingType::Base64 => quote!(Base64),
+        };
+        tokens.extend(extend)
+    }
+}
+
+impl EncodingType {
+    pub fn iterator() -> impl Iterator<Item = EncodingType> {
+        [EncodingType::LowerHex, EncodingType::UpperHex, EncodingType::Base64]
+            .iter()
+            .copied()
+    }
+}
+
+/// Contains pretty much all the info needed for the macros to work their magic.
 #[derive(Debug, Clone, FromMeta)]
 #[darling(derive_syn_parse)]
 #[allow(dead_code)]
@@ -17,9 +45,9 @@ pub(crate) struct Args {
     /// Name of the crate the hasher belongs to. The module that implements this hashstr should be
     /// named the same.
     pub hasher_crate: Option<Ident>,
-    /// If the encoded hex should be enforced as uppercase.
+    /// The type of encoding of the generated hashstr.
     #[darling(default)]
-    pub upper: bool,
+    pub encoding: EncodingType,
     /// Manually set the name of the hash instead of using the hasher ident
     pub hash_name: Option<String>,
     /// Hash length constant
@@ -42,6 +70,7 @@ pub(crate) struct Args {
 }
 
 impl Args {
+    /// Default impl for any given `digest` method
     pub fn digest(&self) -> TokenStream {
         let hasher = self.hasher_ident();
         match &self.digest {
@@ -53,6 +82,7 @@ impl Args {
             },
         }
     }
+    /// Default impl for any given `digest_reader` method
     pub fn digest_reader(&self) -> TokenStream {
         let hasher = self.hasher_ident();
         match &self.digest_reader {
@@ -66,6 +96,7 @@ impl Args {
             },
         }
     }
+    /// Default impl for any given `digest_file` method
     pub fn digest_file(&self) -> TokenStream {
         let hasher = self.hasher_ident();
         match &self.digest_file {
@@ -80,6 +111,7 @@ impl Args {
             },
         }
     }
+    /// Ident of the underlying hasher.
     pub fn hasher_ident(&self) -> Ident {
         if let Some(path) = &self.hasher {
             if let Some(seg) = path.segments.last() {
@@ -94,6 +126,7 @@ impl Args {
             abort!(self.hasher, "hasher attribute must be set")
         }
     }
+    /// String literal token of the hasher for use in docs.
     pub fn hash_name_str(&self) -> LitStr {
         if let Some(ident) = &self.hash_name {
             LitStr::new(ident, Span::call_site())
@@ -106,6 +139,7 @@ impl Args {
             )
         }
     }
+    /// Get the inner ident of this hashstr's typenum const.
     pub fn unwrap_con(&self) -> Ident {
         if let Some(con) = &self.con {
             con.clone()
@@ -133,35 +167,55 @@ impl Args {
             }
         }
     }
-    pub fn struct_ident(&self, upper: bool) -> Ident {
-        let base = self
-            .hash_name
-            .clone()
-            .unwrap_or(self.hasher_ident().to_string());
-        if upper {
-            ident!("{base}StrUpper")
-        } else {
-            ident!("{base}Str")
+    /// The struct ident. Joins [`Self::hash_name`] with a suffix based on encoding.
+    pub fn struct_ident(&self, encoding: EncodingType) -> Ident {
+        let base = self.hash_name_str().value();
+        match encoding {
+            EncodingType::LowerHex => ident!("{base}Str"),
+            EncodingType::UpperHex => ident!("{base}StrUpper"),
+            EncodingType::Base64 => ident!("{base}Base64"),
         }
     }
-    pub fn struct_path(&self, upper: bool) -> Path {
-        let ident = self.struct_ident(upper);
+    /// The struct ident in snake case.
+    pub fn struct_snake(&self, encoding: EncodingType) -> Ident {
+        let base = self.hash_name_str().value().to_lowercase();
+        match encoding {
+            EncodingType::LowerHex => ident!("{base}_str_upper"),
+            EncodingType::UpperHex => ident!("{base}_str"),
+            EncodingType::Base64 => ident!("{base}_base64"),
+        }
+    }
+    /// Relative path inside the crate to the struct. In other words, without `crate`/`hashstr`
+    /// root.
+    ///
+    /// Used in generated documentation.
+    pub fn struct_path(&self, encoding: EncodingType) -> Path {
+        let ident = self.struct_ident(encoding);
         let mod_name = self.hasher.as_ref().unwrap().segments[0].ident.clone();
         Path::from_string(format!("{mod_name}::{ident}").as_str()).unwrap()
     }
-    pub fn struct_snake(&self, upper: bool) -> Ident {
-        let base = self
-            .hash_name
-            .clone()
-            .unwrap_or(self.hasher_ident().to_string())
-            .to_lowercase();
-        if upper {
-            ident!("{base}_str_upper")
+    /// String literal "upper" or "lower" based on [`Self::encoding`]
+    pub fn casing(&self) -> &str {
+        if self.encoding == EncodingType::UpperHex {
+            "upper"
         } else {
-            ident!("{base}_str")
+            "lower"
         }
     }
-    pub fn casing(&self) -> &str {
-        if self.upper { "upper" } else { "lower" }
+    /// `true` if [`Self::EncodingType`] == [`EncodingType::UpperHex`]
+    pub fn is_upper(&self) -> bool {
+        if self.encoding == EncodingType::UpperHex {
+            true
+        } else {
+            false
+        }
+    }
+    /// `true` if [`Self::EncodingType`] == [`EncodingType::Base64`]
+    pub fn is_base64(&self) -> bool {
+        if self.encoding == EncodingType::Base64 {
+            true
+        } else {
+            false
+        }
     }
 }
