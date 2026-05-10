@@ -3,7 +3,7 @@ use proc_macro2::TokenStream;
 use quote::{ToTokens, quote};
 use syn::Ident;
 
-use crate::Args;
+use crate::{Args, args::EncodingType};
 
 #[derive(Debug, FromDeriveInput)]
 #[darling(
@@ -334,6 +334,39 @@ impl StrWrapperRec {
                 }
             }
         });
+
+        // Convert between other variants
+
+        if args.encoding == EncodingType::UpperHex {
+            let lower_hex = args.struct_ident(EncodingType::LowerHex);
+            tokens.extend(quote! {
+                impl From<#lower_hex> for #ident {
+                    fn from(value: #lower_hex) -> Self {
+                        Self(value.to_uppercase())
+                    }
+                }
+                impl From<&#lower_hex> for #ident {
+                    fn from(value: &#lower_hex) -> Self {
+                        Self(value.to_uppercase())
+                    }
+                }
+            });
+        }
+        if args.encoding == EncodingType::LowerHex {
+            let upper_hex = args.struct_ident(EncodingType::UpperHex);
+            tokens.extend(quote! {
+                impl From<#upper_hex> for #ident {
+                    fn from(value: #upper_hex) -> Self {
+                        Self(value.to_lowercase())
+                    }
+                }
+                impl From<&#upper_hex> for #ident {
+                    fn from(value: &#upper_hex) -> Self {
+                        Self(value.to_lowercase())
+                    }
+                }
+            });
+        }
 
         // Eq/PartialEq
         //

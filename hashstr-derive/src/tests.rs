@@ -184,6 +184,32 @@ pub fn generate_tests(args: &Args) -> proc_macro2::TokenStream {
             },
         ),
         (
+            "variant_convert",
+            quote! {
+                #[test]
+                fn variant_convert() {
+                    use digest::typenum::Unsigned;
+
+                    // Data vars
+                    let data_str = "> people are drawn to their own destruction like moths to a flame";
+
+                    // All hashes are the same besides encoding, and should convert cleanly
+                    let lower_hex = #ident_lower::digest(data_str);
+                    let upper_hex = #ident_upper::digest(data_str);
+
+                    let lower_hex_to_upper_hex = #ident_upper::from(&lower_hex);
+                    let upper_hex_to_lower_hex = #ident_lower::from(&upper_hex);
+
+                    // Debug print
+                    println!("lower_hex: {lower_hex:?}");
+                    println!("upper_hex: {upper_hex:?}");
+
+                    assert!(lower_hex_to_upper_hex == lower_hex.to_uppercase());
+                    assert!(upper_hex_to_lower_hex == upper_hex.to_lowercase());
+                }
+            },
+        ),
+        (
             "length_error",
             quote! {
                 #[test]
