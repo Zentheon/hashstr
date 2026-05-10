@@ -134,14 +134,14 @@ impl StrWrapperRec {
                 /// Returns an uppercase hexadecimal [`fstr::FStr`] of the hash.
                 ///
                 /// If using an *Upper variant, prefer [`Self::to_string()`] instead.
-                pub fn to_uppercase(&self) -> String {
-                    crate::convert_hex_case_fstr::<#con_int_x2, true>(&self.0).to_string()
+                pub fn to_uppercase(&self) -> fstr::FStr<#con_int_x2> {
+                    crate::convert_hex_case_fstr::<#con_int_x2, true>(&self.0)
                 }
                 /// Returns a lowercase hexadecimal [`fstr::FStr`] of the hash.
                 ///
                 /// If using a non *Upper variant, prefer [`Self::to_string()`] instead.
-                pub fn to_lowercase(&self) -> String {
-                    crate::convert_hex_case_fstr::<#con_int_x2, false>(&self.0).to_string()
+                pub fn to_lowercase(&self) -> fstr::FStr<#con_int_x2> {
+                    crate::convert_hex_case_fstr::<#con_int_x2, false>(&self.0)
                 }
                 /// Returns a raw UTF8 bytes array of the underlying hex converted to the specified casing.
                 pub const fn convert_case_raw<const TO_UPPER: bool>(&self) -> [u8; #con_int_x2] {
