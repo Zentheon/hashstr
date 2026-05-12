@@ -24,12 +24,12 @@ macro_rules! impl_sha1_checked  {
         }
         impl From<&GenericArray<u8, U20>> for $ident {
             fn from(value: &GenericArray<u8, U20>) -> Self {
-                Self::encode_bytes(value).unwrap()
+                Self::encode(value).unwrap()
             }
         }
         impl From<GenericArray<u8, U20>> for $ident {
             fn from(value: GenericArray<u8, U20>) -> Self {
-                Self::encode_bytes(value).unwrap()
+                Self::encode(value).unwrap()
             }
         }
         impl $ident {

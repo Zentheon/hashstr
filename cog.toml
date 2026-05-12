@@ -28,7 +28,3 @@ template = "./changelog-template"
 authors = [
     { username = "Zentheon", signature = "Zentheon" }
 ]
-
-[bump_profiles]
-
-[packages]

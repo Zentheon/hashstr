@@ -43,10 +43,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fd307490d624467aa6f74b0eabb77633d1f758a7b25f12bceb0b22e08d9726f6"
 
 [[package]]
-name = "base64"
-version = "0.22.1"
+name = "base64ct"
+version = "1.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
+checksum = "2af50177e190e07a26ab74f8b1efbfe2ef87da2116221318cb1c2e82baf7de06"
 
 [[package]]
 name = "bash-f"
@@ -377,7 +377,7 @@ version = "0.2.0"
 dependencies = [
  "ascon-hash256",
  "base16ct",
- "base64",
+ "base64ct",
  "bash-hash",
  "belt-hash",
  "blake2",
@@ -391,7 +391,7 @@ dependencies = [
  "generic-array 1.4.1",
  "gost94",
  "groestl",
- "hashstr-derive 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "hashstr-derive",
  "hybrid-array",
  "jh",
  "kupyna",
@@ -416,19 +416,6 @@ dependencies = [
 [[package]]
 name = "hashstr-derive"
 version = "0.2.0"
-dependencies = [
- "darling",
- "proc-macro-error",
- "proc-macro2",
- "quote",
- "syn 2.0.117",
-]
-
-[[package]]
-name = "hashstr-derive"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d41fb36b850fb7843f4feb77aec285665b370203ac74cbcdf8be6eeee8d9c92e"
 dependencies = [
  "darling",
  "proc-macro-error",

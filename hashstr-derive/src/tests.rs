@@ -98,8 +98,8 @@ pub fn generate_tests(args: &Args) -> proc_macro2::TokenStream {
 
                     let hash1: #ident = b_string.as_str().try_into().unwrap();
                     let hash2: #ident = b_string.clone().try_into().unwrap();
-                    let hash3: #ident = #ident::from_hex(b_string.as_str()).unwrap();
-                    let hash4: #ident = unsafe { #ident::from_hex_unchecked(array) };
+                    let hash3: #ident = #ident::from_str(b_string.as_str()).unwrap();
+                    let hash4: #ident = unsafe { #ident::from_inner_unchecked(array) };
 
                     // Debug print
                     println!("input string (len {}): {b_string}", b_string.len());
@@ -138,12 +138,12 @@ pub fn generate_tests(args: &Args) -> proc_macro2::TokenStream {
                     // Lowercase hashes
                     let lower = #ident_lower::digest(data_str);
                     let lower_b1 = #ident_lower::from(array);
-                    let lower_b2 = unsafe { #ident_lower::from_hex_unchecked(hex_lower) };
+                    let lower_b2 = unsafe { #ident_lower::from_inner_unchecked(hex_lower) };
 
                     // Uppercase hashes
                     let upper = #ident_upper::digest(data_str);
                     let upper_b1 = #ident_upper::from(array);
-                    let upper_b2 = unsafe { #ident_upper::from_hex_unchecked(hex_upper) };
+                    let upper_b2 = unsafe { #ident_upper::from_inner_unchecked(hex_upper) };
 
                     // Debug print
                     println!("lower: {lower:?}");
@@ -220,7 +220,7 @@ pub fn generate_tests(args: &Args) -> proc_macro2::TokenStream {
                     let too_long = [20u8; N + 10];
                     let too_short = [20u8; N - 2];
                     let res1 = #ident::try_from(too_long.as_slice());
-                    let res2 = #ident::encode_bytes(too_short.as_slice());
+                    let res2 = #ident::encode(too_short.as_slice());
 
                     match res1 {
                         Err(crate::Error::LengthError(crate::LengthError {
@@ -264,7 +264,7 @@ pub fn generate_tests(args: &Args) -> proc_macro2::TokenStream {
                     let single_bad_char = fstr::FStr::from_inner(slice).unwrap();
 
                     let res1 = #ident::try_from(oops_all_z);
-                    let res2 = #ident::from_hex(single_bad_char);
+                    let res2 = #ident::from_str(single_bad_char);
 
                     match res1 {
                         Err(crate::Error::HexError(crate::HexError {

@@ -210,6 +210,14 @@ impl Args {
             false
         }
     }
+    /// `true` if [`Self::EncodingType`] == [`EncodingType::LowerHex`] or [`EncodingType::UpperHex`]
+    pub fn is_hex(&self) -> bool {
+        if self.encoding == EncodingType::LowerHex || self.encoding == EncodingType::UpperHex {
+            true
+        } else {
+            false
+        }
+    }
     /// `true` if [`Self::EncodingType`] == [`EncodingType::Base64`]
     pub fn is_base64(&self) -> bool {
         if self.encoding == EncodingType::Base64 {

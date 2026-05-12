@@ -87,68 +87,153 @@ impl StrWrapperRec {
                     &self.0
                 }
                 /// Returns a copy of the underlying [`fstr::FStr`]
-                pub fn to_fstr(&self) -> fstr::FStr<#con_int_x2>
+                pub const fn to_fstr(&self) -> fstr::FStr<#con_int_x2>
                 {
                     self.0
-                }
-                /// Encode a hash as a bytes slice into a hash str.
-                ///
-                /// Most of the [`TryFrom`] impls use this method.
-                ///
-                /// # Errors
-                /// * [`crate::Error::LengthError`]: If the input bytes are not the expected hash length.
-                pub fn encode_bytes(value: impl AsRef<[u8]>) -> Result<Self, crate::Error> {
-                    let hex = crate::encode_hex::<#con_int_x2>(value, #upper, #hash_name_str)?;
-                    Ok(Self(hex))
-                }
-                /// `const` equivalent of [`Self::encode_bytes`].
-                ///
-                /// If you don't have a super cool compile-time use case, prefer the aforementioned runtime
-                /// variant instead.
-                pub const fn encode_slice(value: &[u8; #con_int_x2]) -> Self {
-                    Self(crate::encode_hex_const::<#con_int_x2, #upper>(value))
-                }
-                #[doc = concat!("Convert a ", #casing, "case hex-encoded str into a hash str.")]
-                ///
-                /// Most of the string-related [`TryFrom`] impls use this method.
-                pub fn from_hex(value: impl AsRef<str>) -> Result<Self, crate::Error> {
-                    let value = value.as_ref();
-                    crate::check_len::<#con_int_x2>(value.as_ref(), #hash_name_str)?;
-                    const_hex::check(value)
-                        .map_err(|e| crate::Error::from_hex_err(e, value.len(), #con_int, #hash_name_str))?;
-
-                    // SAFETY: Length and encoding has already been checked above.
-                    Ok(Self(unsafe {
-                        fstr::FStr::from_inner_unchecked(
-                            crate::convert_hex_case::<#con_int_x2, #upper>(value.as_bytes().as_array().unwrap())
-                        )
-                    }))
                 }
                 /// Convert a hex slice into a hash str.
                 ///
                 /// # Safety
                 #[doc = concat!("Input value must, at minimum, be valid UTF-8, and __should__ be ", #casing, "case hexadecimal.")]
-                pub const unsafe fn from_hex_unchecked(value: [u8; #con_int_x2]) -> Self {
+                pub const unsafe fn from_inner_unchecked(value: [u8; #con_int_x2]) -> Self {
                     Self(unsafe { fstr::FStr::<#con_int_x2>::from_inner_unchecked(value) })
-                }
-                /// Returns an uppercase hexadecimal [`fstr::FStr`] of the hash.
-                ///
-                /// If using an *Upper variant, prefer [`Self::to_string()`] instead.
-                pub fn to_uppercase(&self) -> fstr::FStr<#con_int_x2> {
-                    crate::convert_hex_case_fstr::<#con_int_x2, true>(&self.0)
-                }
-                /// Returns a lowercase hexadecimal [`fstr::FStr`] of the hash.
-                ///
-                /// If using a non *Upper variant, prefer [`Self::to_string()`] instead.
-                pub fn to_lowercase(&self) -> fstr::FStr<#con_int_x2> {
-                    crate::convert_hex_case_fstr::<#con_int_x2, false>(&self.0)
-                }
-                /// Returns a raw UTF8 bytes array of the underlying hex converted to the specified casing.
-                pub const fn convert_case_raw<const TO_UPPER: bool>(&self) -> [u8; #con_int_x2] {
-                    crate::convert_hex_case::<#con_int_x2, TO_UPPER>(self.as_bytes().as_array().unwrap())
                 }
             }
         });
+
+        // hex-specific
+
+        if args.is_hex() {
+            tokens.extend(quote! {
+                impl #ident {
+                    /// Encode a hash as a bytes slice into a hash str.
+                    ///
+                    /// Most of the [`TryFrom`] impls use this method.
+                    ///
+                    /// # Errors
+                    /// * [`crate::Error::LengthError`]: If the input bytes are not the expected (raw) hash length.
+                    pub fn encode(value: impl AsRef<[u8]>) -> Result<Self, crate::Error> {
+                        let hex = crate::encode_hex::<#con_int_x2>(value, #upper, #hash_name_str)?;
+                        Ok(Self(hex))
+                    }
+                    /// `const` equivalent of [`Self::encode`].
+                    ///
+                    /// If you don't have a super cool compile-time use case, prefer the aforementioned runtime
+                    /// variant instead.
+                    pub const fn encode_slice(value: &[u8; #con_int_x2]) -> Self {
+                        Self(crate::encode_hex_const::<#con_int_x2, #upper>(value))
+                    }
+                    #[doc = concat!("Convert a ", #casing, "case hex-encoded str into a hash str.")]
+                    ///
+                    /// Most of the string-related [`TryFrom`] impls use this method.
+                    pub fn from_str(value: impl AsRef<str>) -> Result<Self, crate::Error> {
+                        let value = value.as_ref();
+                        crate::check_len::<#con_int_x2>(value.as_ref(), #hash_name_str)?;
+                        const_hex::check(value)
+                            .map_err(|e| crate::Error::from_hex_err(e, value.len(), #con_int, #hash_name_str))?;
+
+                        // SAFETY: Length and encoding has already been checked above.
+                        Ok(Self(unsafe {
+                            fstr::FStr::from_inner_unchecked(
+                                crate::convert_hex_case::<#con_int_x2, #upper>(value.as_bytes().as_array().unwrap())
+                            )
+                        }))
+                    }
+                    /// Returns an uppercase hexadecimal [`fstr::FStr`] of the hash.
+                    ///
+                    /// If using an *Upper variant, prefer [`Self::to_string()`] instead.
+                    pub fn to_uppercase(&self) -> fstr::FStr<#con_int_x2> {
+                        crate::convert_hex_case_fstr::<#con_int_x2, true>(&self.0)
+                    }
+                    /// Returns a lowercase hexadecimal [`fstr::FStr`] of the hash.
+                    ///
+                    /// If using a non *Upper variant, prefer [`Self::to_string()`] instead.
+                    pub fn to_lowercase(&self) -> fstr::FStr<#con_int_x2> {
+                        crate::convert_hex_case_fstr::<#con_int_x2, false>(&self.0)
+                    }
+                    /// Returns a raw UTF8 bytes array of the underlying hex converted to the specified casing.
+                    pub const fn convert_case_raw<const TO_UPPER: bool>(&self) -> [u8; #con_int_x2] {
+                        crate::convert_hex_case::<#con_int_x2, TO_UPPER>(self.as_bytes().as_array().unwrap())
+                    }
+                }
+            });
+        }
+
+        // base64-specific
+
+        if args.is_base64() {
+            tokens.extend(quote! {
+                impl #ident {
+                    /// Encodes a raw hash into default, padded base64
+                    ///
+                    /// See [`base64ct::Base64`] for specifics.
+                    ///
+                    /// # Errors
+                    /// * [`crate::Error::LengthError`]: If the input bytes are not the expected (raw) hash length.
+                    fn encode(value: impl AsRef<[u8]>) -> Result<Self, crate::Error> {
+                        let bytes = value.as_ref();
+                        // Ensure length correctness
+                        crate::check_len::<{ base64_encoded_len(64) }>(bytes, #hash_name_str)?;
+                        let mut array = [0u8; base64_encoded_len(64)];
+                        base64ct::Base64::encode(bytes, &mut array).unwrap();
+                        // SAFETY: Output of base64ct encode methods are UTF8 in the ASCII range.
+                        Ok(Self(unsafe { fstr::FStr::from_inner_unchecked(array) }))
+                    }
+                    /// Encodes a raw hash slice into default, padded base64
+                    ///
+                    /// See [`base64ct::Base64`] for specifics.
+                    fn encode_slice(value: &[u8; 64]) -> Self {
+                        let mut array = [0u8; base64_encoded_len(64)];
+                        base64ct::Base64::encode(value, &mut array).unwrap();
+                        // SAFETY: Output of base64ct encode methods are UTF8 in the ASCII range.
+                        Self(unsafe { fstr::FStr::from_inner_unchecked(array) })
+                    }
+                    /// Encodes a raw hash slice into url-safe, padded base64
+                    ///
+                    /// See [`base64ct::Base64Url`] for specifics.
+                    fn encode_slice_url_safe(value: &[u8; 64]) -> Self {
+                        let mut array = [0u8; base64_encoded_len(64)];
+                        base64ct::Base64Url::encode(value, &mut array).unwrap();
+                        // SAFETY: Output of base64ct encode methods are UTF8 in the ASCII range.
+                        Self(unsafe { fstr::FStr::from_inner_unchecked(array) })
+                    }
+                    /// Encodes a raw hash slice into bcrypt, padded base64
+                    ///
+                    /// See [`base64ct::Base64Bcrypt`] for specifics.
+                    fn encode_slice_bcrypt(value: &[u8; 64]) -> Self {
+                        let mut array = [0u8; base64_encoded_len(64)];
+                        base64ct::Base64Bcrypt::encode(value, &mut array).unwrap();
+                        // SAFETY: Output of base64ct encode methods are UTF8 in the ASCII range.
+                        Self(unsafe { fstr::FStr::from_inner_unchecked(array) })
+                    }
+                    /// Encodes a raw hash slice into shacrypt, padded base64
+                    ///
+                    /// See [`base64ct::Base64ShaCrypt`] for specifics.
+                    fn encode_slice_shacrypt(value: &[u8; 64]) -> Self {
+                        let mut array = [0u8; base64_encoded_len(64)];
+                        base64ct::Base64ShaCrypt::encode(value, &mut array).unwrap();
+                        // SAFETY: Output of base64ct encode methods are UTF8 in the ASCII range.
+                        Self(unsafe { fstr::FStr::from_inner_unchecked(array) })
+                    }
+                    #[doc = concat!("Convert a ", #casing, "case hex-encoded str into a hash str.")]
+                    ///
+                    /// Most of the string-related [`TryFrom`] impls use this method.
+                    pub fn from_inner(value: impl AsRef<str>) -> Result<Self, crate::Error> {
+                        let value = value.as_ref();
+                        crate::check_len::<#con_int_x2>(value.as_ref(), #hash_name_str)?;
+                        const_hex::check(value)
+                            .map_err(|e| crate::Error::from_hex_err(e, value.len(), #con_int, #hash_name_str))?;
+
+                        // SAFETY: Length and encoding has already been checked above.
+                        Ok(Self(unsafe {
+                            fstr::FStr::from_inner_unchecked(
+                                crate::convert_hex_case::<#con_int_x2, #upper>(value.as_bytes().as_array().unwrap())
+                            )
+                        }))
+                    }
+                }
+            });
+        }
 
         // Misc traits
 
@@ -236,7 +321,7 @@ impl StrWrapperRec {
                 type Error = crate::Error;
 
                 fn try_from(value: &str) -> Result<Self, Self::Error> {
-                    Self::from_hex(value)
+                    Self::from_str(value)
                 }
             }
 
@@ -244,7 +329,7 @@ impl StrWrapperRec {
                 type Error = crate::Error;
 
                 fn try_from(value: String) -> Result<Self, Self::Error> {
-                    Self::from_hex(value)
+                    Self::from_str(value)
                 }
             }
 
@@ -252,7 +337,7 @@ impl StrWrapperRec {
                 type Err = crate::Error;
 
                 fn from_str(value: &str) -> Result<Self, Self::Err> {
-                    Self::from_hex(value)
+                    Self::from_str(value)
                 }
             }
 
@@ -260,7 +345,7 @@ impl StrWrapperRec {
                 type Error = crate::Error;
 
                 fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-                    Self::encode_bytes(value)
+                    Self::encode(value)
                 }
             }
 
@@ -268,7 +353,7 @@ impl StrWrapperRec {
                 type Error = crate::Error;
 
                 fn try_from(value: &fstr::FStr<#con_int_x2>) -> Result<Self, Self::Error> {
-                    Self::from_hex(value)
+                    Self::from_str(value)
                 }
             }
 
@@ -276,37 +361,37 @@ impl StrWrapperRec {
                 type Error = crate::Error;
 
                 fn try_from(value: fstr::FStr<#con_int_x2>) -> Result<Self, Self::Error> {
-                    Self::from_hex(value)
+                    Self::from_str(value)
                 }
             }
 
             impl From<[u8; #con_int]> for #ident {
                 fn from(value: [u8; #con_int]) -> Self {
-                    Self::encode_bytes(value).unwrap()
+                    Self::encode(value).unwrap()
                 }
             }
 
             impl From<&hybrid_array::Array<u8, #con>> for #ident {
                 fn from(value: &digest::array::Array<u8, #con>) -> Self {
-                    Self::encode_bytes(value).unwrap()
+                    Self::encode(value).unwrap()
                 }
             }
 
             impl From<hybrid_array::Array<u8, #con>> for #ident {
                 fn from(value: digest::array::Array<u8, #con>) -> Self {
-                    Self::encode_bytes(&value).unwrap()
+                    Self::encode(&value).unwrap()
                 }
             }
 
             impl From<&generic_array::GenericArray<u8, #con>> for #ident {
                 fn from(value: &generic_array::GenericArray<u8, #con>) -> Self {
-                    Self::encode_bytes(value).unwrap()
+                    Self::encode(value).unwrap()
                 }
             }
 
             impl From<generic_array::GenericArray<u8, #con>> for #ident {
                 fn from(value: generic_array::GenericArray<u8, #con>) -> Self {
-                    Self::encode_bytes(value).unwrap()
+                    Self::encode(value).unwrap()
                 }
             }
 

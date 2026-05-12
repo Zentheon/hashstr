@@ -58,48 +58,48 @@ impl_hashstr!(
 
 impl From<&GenericArray<u8, U32>> for Blake2s256Str {
     fn from(value: &GenericArray<u8, U32>) -> Self {
-        Self::encode_bytes(value).unwrap()
+        Self::encode(value).unwrap()
     }
 }
 
 impl From<GenericArray<u8, U32>> for Blake2s256Str {
     fn from(value: GenericArray<u8, U32>) -> Self {
-        Self::encode_bytes(value).unwrap()
+        Self::encode(value).unwrap()
     }
 }
 
 impl From<&GenericArray<u8, U32>> for Blake2s256StrUpper {
     fn from(value: &GenericArray<u8, U32>) -> Self {
-        Self::encode_bytes(value).unwrap()
+        Self::encode(value).unwrap()
     }
 }
 
 impl From<GenericArray<u8, U32>> for Blake2s256StrUpper {
     fn from(value: GenericArray<u8, U32>) -> Self {
-        Self::encode_bytes(value).unwrap()
+        Self::encode(value).unwrap()
     }
 }
 
 impl From<&GenericArray<u8, U64>> for Blake2b512Str {
     fn from(value: &GenericArray<u8, U64>) -> Self {
-        Self::encode_bytes(value).unwrap()
+        Self::encode(value).unwrap()
     }
 }
 
 impl From<GenericArray<u8, U64>> for Blake2b512Str {
     fn from(value: GenericArray<u8, U64>) -> Self {
-        Self::encode_bytes(value).unwrap()
+        Self::encode(value).unwrap()
     }
 }
 
 impl From<&GenericArray<u8, U64>> for Blake2b512StrUpper {
     fn from(value: &GenericArray<u8, U64>) -> Self {
-        Self::encode_bytes(value).unwrap()
+        Self::encode(value).unwrap()
     }
 }
 
 impl From<GenericArray<u8, U64>> for Blake2b512StrUpper {
     fn from(value: GenericArray<u8, U64>) -> Self {
-        Self::encode_bytes(value).unwrap()
+        Self::encode(value).unwrap()
     }
 }

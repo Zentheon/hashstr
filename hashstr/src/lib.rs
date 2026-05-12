@@ -58,6 +58,13 @@ pub mod tiger;
 #[cfg(feature = "whirlpool")]
 pub mod whirlpool;
 
+/// formula to get the required character slots (including padding space).
+///
+/// base64ct already has a method to do this, except it is not const.
+const fn base64_encoded_len(bytes: usize) -> usize {
+    ((bytes + 2) / 3) * 4
+}
+
 /// The table of lowercase letters (no numbers).
 pub const HEX_LETTERS_LOWER: &[u8; 6] = b"abcdef";
 
