@@ -1,13 +1,15 @@
+# https://doc.rust-lang.org/cargo/reference/manifest.html
+
 [package]
-authors = ["Zentheon <zentheon@mailbox.org>"]
-edition = "2024"
 name = "hashstr-derive"
 description = "Derive macro magic behind the hashstr crate"
 version = "0.2.0"
-readme = "../README.md"
+edition = "2024"
+authors = ["Zentheon <zentheon@mailbox.org>"]
+readme = "./README.md"
+license-file = "./LICENSE"
 repository = "https://github.com/Zentheon/hashstr"
 homepage = "https://github.com/Zentheon/hashstr"
-license-file = "../LICENSE"
 
 [lib]
 proc-macro = true

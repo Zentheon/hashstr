@@ -1,6 +1,24 @@
+# This line needs to come before anything else in Cargo.toml
+cargo-features = ["codegen-backend"]
+
 [workspace]
 resolver = "3"
 members = [
+    "benchmarks",
     "hashstr",
     "hashstr-derive",
 ]
+
+[profile.dev]
+# Very fast codegen backend. Rust support is experimental and requires nightly.
+codegen-backend = "cranelift"
+
+# https://gungraun.github.io/gungraun/latest/html/installation/prerequisites.html
+[profile.bench]
+debug = true
+strip = false
+
+# Cranelift does not yet support code instrumentation. llvm is required for code coverage
+[profile.cov]
+inherits = "dev"
+codegen-backend = "llvm"

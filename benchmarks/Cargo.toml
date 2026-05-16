@@ -1,0 +1,32 @@
+# https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[package]
+name = "benchmarks"
+description = "Some very cool oxidized benchmarks!"
+version = "0.2.0"
+edition = "2024"
+authors = ["Zentheon <zentheon@mailbox.org>"]
+readme = "./README.md"
+license-file = "./LICENSE"
+repository = "https://github.com/Zentheon/hashstr"
+homepage = "https://github.com/Zentheon/hashstr"
+publish = false
+
+[dependencies]
+fstr = "0.2.17"
+generic-array = "1.3.5"
+constant_time_eq = "0.5.0"
+digest = "0.11.2"
+digest-io = "0.1.0"
+hybrid-array = "0.4.11"
+const-hex = "1.18.1"
+base16ct = { version = "1.0.0", features = ["alloc"] }
+base64ct = "1.8.3"
+hashstr = { version = "0.2.0", path = "../hashstr", features = ["sha1", "sha3", "blake3"] }
+sha3 = "0.11.0"
+typenum = "1.20.0"
+criterion = "0.8.2"
+
+[[bench]]
+harness = false
+name = "primary"

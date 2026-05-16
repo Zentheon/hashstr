@@ -11,6 +11,7 @@ skip_untracked = false
 pre_bump_hooks = [
     "cargo check",
     "cargo test --all-features",
+    "sed -i '/^version = \"/ cversion = \"{{version}}\"' benchmarks/Cargo.toml",
     "sed -i '/^version = \"/ cversion = \"{{version}}\"' hashstr-derive/Cargo.toml",
     "sed -i '/^version = \"/ cversion = \"{{version}}\"' hashstr/Cargo.toml",
 ]
