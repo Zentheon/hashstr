@@ -267,29 +267,21 @@ pub fn generate_tests(args: &Args) -> proc_macro2::TokenStream {
                     let res2 = #ident::from_str(single_bad_char);
 
                     match res1 {
-                        Err(crate::Error::HexError(crate::HexError {
-                            char,
-                            index,
+                        Err(crate::Error::EncodingError(crate::EncodingError {
                             hash_name,
                         })) => {
-                            assert!(char == 'z');
-                            assert!(index == 0);
                             assert!(hash_name == #hash_name);
                         },
-                        _ => panic!("This should be a HexError"),
+                        _ => panic!("This should be an EncodingError"),
                     };
 
                     match res2 {
-                        Err(crate::Error::HexError(crate::HexError {
-                            char,
-                            index,
+                        Err(crate::Error::EncodingError(crate::EncodingError {
                             hash_name,
                         })) => {
-                            assert!(char == 'g');
-                            assert!(index == HEX_LEN / 2);
                             assert!(hash_name == #hash_name);
                         },
-                        _ => panic!("This should be a HexError"),
+                        _ => panic!("This should be an EncodingError"),
                     };
                 }
             },

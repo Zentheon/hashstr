@@ -155,38 +155,56 @@ pub fn encode_hex<const HEX_LEN: usize>(
     hash_name: &'static str,
 ) -> Result<FStr<HEX_LEN>, Error> {
     let value = value.as_ref();
+    if value.len() != HEX_LEN / 2 {
+        Err(Error::LengthError(LengthError {
+            expected: HEX_LEN / 2,
+            actual: value.len(),
+            hash_name,
+        }))?;
+    };
+
     let mut hex = [0u8; HEX_LEN];
 
-    let encode = if upper {
-        const_hex::encode_to_slice_upper(value, &mut hex)
+    let _ = if upper {
+        base16ct::upper::encode(value, &mut hex)
     } else {
-        const_hex::encode_to_slice(value, &mut hex)
+        base16ct::lower::encode(value, &mut hex)
     };
-    match encode {
-        // SAFETY: Must be valid utf-8. Should already be well within bounds after the hex
-        // encode
-        Ok(_) => Ok(unsafe { FStr::from_inner_unchecked(hex) }),
-        Err(err) => Err(Error::from_hex_err(
-            err,
-            HEX_LEN / 2,
-            value.len(),
-            hash_name,
-        )),
-    }
+
+    unsafe { Ok(FStr::from_inner_unchecked(hex)) }
 }
 
-/// Encodes a byte slice to an [`FStr`] in lowercase hexidecimal
-pub const fn encode_hex_const<const HEX_LEN: usize, const UPPER: bool>(
-    value: &[u8; HEX_LEN],
-) -> FStr<HEX_LEN> {
-    let buf: const_hex::Buffer<HEX_LEN> = if UPPER {
-        const_hex::Buffer::new().const_format_upper(value)
+/// Decodes hexadecimal into raw bytes using [`base16ct`]
+///
+/// # Args
+/// * `const N`: Expected length after decode
+/// * `value`: The data to encode.
+/// * `hash_name`: Name of the hasher to use in an error.
+///
+/// # Errors
+/// * [`Error::HexError`]: If the input did not contain valid base16
+pub fn decode_hex<const N: usize, const UPPER: bool>(
+    value: impl AsRef<[u8]>,
+    hash_name: &'static str,
+) -> Result<[u8; N], Error> {
+    let mut decoded = [0u8; N];
+
+    match if UPPER {
+        base16ct::upper::decode(&value, &mut decoded)
     } else {
-        const_hex::Buffer::new().const_format(value)
-    };
-    // SAFETY: Must be valid utf-8. Should already be well within bounds after the hex
-    // encode
-    unsafe { FStr::from_inner_unchecked(*buf.as_byte_array()) }
+        base16ct::lower::decode(&value, &mut decoded)
+    } {
+        Ok(_) => Ok(()),
+        Err(base16ct::Error::InvalidEncoding) => Err(Error::EncodingError(crate::EncodingError {
+            hash_name: hash_name,
+        })),
+        Err(base16ct::Error::InvalidLength) => Err(Error::LengthError(LengthError {
+            expected: N,
+            actual: value.as_ref().len(),
+            hash_name,
+        })),
+    }?;
+    Ok(decoded)
 }
 
 /// Builds an [`Error`] if the input value length is not `N`
@@ -223,19 +241,11 @@ impl LengthError {
 }
 
 #[derive(Debug, Clone)]
-pub struct HexError {
-    pub(crate) char: char,
-    pub(crate) index: usize,
+pub struct EncodingError {
     pub(crate) hash_name: &'static str,
 }
 
-impl HexError {
-    pub const fn char(&self) -> char {
-        self.char
-    }
-    pub const fn index(&self) -> usize {
-        self.index
-    }
+impl EncodingError {
     pub const fn hash_name(&self) -> &'static str {
         self.hash_name
     }
@@ -244,20 +254,20 @@ impl HexError {
 #[derive(Debug, Clone)]
 pub enum Error {
     LengthError(LengthError),
-    HexError(HexError),
+    EncodingError(EncodingError),
 }
 
 impl Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::LengthError(e) => write!(f, "{e}"),
-            Self::HexError(e) => write!(f, "{e}"),
+            Self::EncodingError(e) => write!(f, "{e}"),
         }
     }
 }
 
 impl Error {
-    pub fn from_fstr_err<T>(
+    pub(crate) fn from_fstr_err<T>(
         res: Result<T, fstr::LengthError>,
         name: &'static str,
     ) -> Result<T, Error> {
@@ -270,26 +280,15 @@ impl Error {
             })),
         }
     }
-    pub const fn from_hex_err(
-        err: const_hex::FromHexError,
+    pub(crate) const fn from_hex_err(
+        err: base16ct::Error,
         expected: usize,
         actual: usize,
         hash_name: &'static str,
     ) -> Error {
         match err {
-            const_hex::FromHexError::InvalidHexCharacter { c, index } => {
-                Error::HexError(HexError {
-                    char: c,
-                    index,
-                    hash_name,
-                })
-            }
-            const_hex::FromHexError::OddLength => Error::LengthError(LengthError {
-                expected: expected,
-                actual: actual,
-                hash_name,
-            }),
-            const_hex::FromHexError::InvalidStringLength => Error::LengthError(LengthError {
+            base16ct::Error::InvalidEncoding => Error::EncodingError(EncodingError { hash_name }),
+            base16ct::Error::InvalidLength => Error::LengthError(LengthError {
                 expected: expected,
                 actual: actual,
                 hash_name,
@@ -299,7 +298,7 @@ impl Error {
 }
 
 impl std::error::Error for LengthError {}
-impl std::error::Error for HexError {}
+impl std::error::Error for EncodingError {}
 impl std::error::Error for Error {}
 
 impl Display for LengthError {
@@ -312,7 +311,7 @@ impl Display for LengthError {
     }
 }
 
-impl Display for HexError {
+impl Display for EncodingError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "Characters in {} should be hexadecimal", self.hash_name)
     }

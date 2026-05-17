@@ -106,7 +106,7 @@ impl StrWrapperRec {
         if args.is_hex() {
             tokens.extend(quote! {
                 impl #ident {
-                    /// Encode a hash as a bytes slice into a hash str.
+                    /// Encode a raw hash into a hash str.
                     ///
                     /// Most of the [`TryFrom`] impls use this method.
                     ///
@@ -116,21 +116,18 @@ impl StrWrapperRec {
                         let hex = crate::encode_hex::<#con_int_x2>(value, #upper, #hash_name_str)?;
                         Ok(Self(hex))
                     }
-                    /// `const` equivalent of [`Self::encode`].
-                    ///
-                    /// If you don't have a super cool compile-time use case, prefer the aforementioned runtime
-                    /// variant instead.
-                    pub const fn encode_slice(value: &[u8; #con_int_x2]) -> Self {
-                        Self(crate::encode_hex_const::<#con_int_x2, #upper>(value))
+                    /// Encode a raw hash array into a hash str.
+                    pub fn encode_slice(value: &[u8; #con_int]) -> Self {
+                        let hex = crate::encode_hex::<#con_int_x2>(value, #upper, #hash_name_str).unwrap();
+                        Self(hex)
                     }
                     #[doc = concat!("Convert a ", #casing, "case hex-encoded str into a hash str.")]
                     ///
                     /// Most of the string-related [`TryFrom`] impls use this method.
                     pub fn from_str(value: impl AsRef<str>) -> Result<Self, crate::Error> {
                         let value = value.as_ref();
-                        crate::check_len::<#con_int_x2>(value.as_ref(), #hash_name_str)?;
-                        const_hex::check(value)
-                            .map_err(|e| crate::Error::from_hex_err(e, value.len(), #con_int, #hash_name_str))?;
+
+                        crate::decode_hex::<#con_int_x2, #upper>(value, #hash_name_str)?;
 
                         // SAFETY: Length and encoding has already been checked above.
                         Ok(Self(unsafe {
@@ -141,13 +138,13 @@ impl StrWrapperRec {
                     }
                     /// Returns an uppercase hexadecimal [`fstr::FStr`] of the hash.
                     ///
-                    /// If using an *Upper variant, prefer [`Self::to_string`] instead.
+                    /// If using an *Upper variant, prefer [`Self::to_fstr`] instead.
                     pub const fn to_uppercase(&self) -> fstr::FStr<#con_int_x2> {
                         crate::convert_hex_case_fstr::<#con_int_x2, true>(&self.0)
                     }
                     /// Returns a lowercase hexadecimal [`fstr::FStr`] of the hash.
                     ///
-                    /// If using a non *Upper variant, prefer [`Self::to_string`] instead.
+                    /// If using a non *Upper variant, prefer [`Self::to_fstr`] instead.
                     pub const fn to_lowercase(&self) -> fstr::FStr<#con_int_x2> {
                         crate::convert_hex_case_fstr::<#con_int_x2, false>(&self.0)
                     }
@@ -221,8 +218,8 @@ impl StrWrapperRec {
                     pub fn from_inner(value: impl AsRef<str>) -> Result<Self, crate::Error> {
                         let value = value.as_ref();
                         crate::check_len::<#con_int_x2>(value.as_ref(), #hash_name_str)?;
-                        const_hex::check(value)
-                            .map_err(|e| crate::Error::from_hex_err(e, value.len(), #con_int, #hash_name_str))?;
+                        base16ct::lower::decode(value, &mut decoded)
+                            .map_err(|_| crate::Error::EncodingError(EncodingError { #hash_name_str }))?;
 
                         // SAFETY: Length and encoding has already been checked above.
                         Ok(Self(unsafe {
