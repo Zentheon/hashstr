@@ -42,7 +42,7 @@ whirlpool = ["dep:whirlpool"]
 
 [dependencies]
 hash-str-derive = { path = "../hash-str-derive" }
-fstr = "0.2.20"
+fstr = "0.2.17"
 generic-array = "1.3.5"
 serde = { version = "1.0.219", optional = true }
 tracing = { version = "0.1.41", optional = true }

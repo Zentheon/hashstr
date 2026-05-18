@@ -82,7 +82,7 @@ assert!(Sha256String::default() == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b
 ## Efficiency
 `hash-str`s aren't just convenient, they're efficient!
 
-* All types wrap [fstr](https://docs.rs/fstr/0.2.20/fstr/) under the hood, which allows for fixed-sized [`str`]-likes.
+* All types wrap [fstr](https://docs.rs/fstr/0.2.18/fstr/) under the hood, which allows for fixed-sized [`str`]-likes. 
 * Encoding is done with [`const_hex`](https://docs.rs/const-hex/latest)
 * `PartialEq` impls use [constant_time_eq](https://docs.rs/constant_time_eq/latest) for best practice. 
 * Casing conversion uses a purpose-built function.
