@@ -63,6 +63,7 @@ macro_rules! impl_sha1_checked  {
                 result
             }
 
+            #[cfg(feature = "std")]
             pub fn digest_reader<R>(
                 read: &mut R,
             ) -> Result<CollisionResult<Self>, std::io::Error>
@@ -84,6 +85,7 @@ macro_rules! impl_sha1_checked  {
                 Ok(result)
             }
 
+            #[cfg(feature = "std")]
             pub fn digest_file(
                 path: impl AsRef<std::path::Path>,
             ) -> Result<CollisionResult<Self>, std::io::Error> {

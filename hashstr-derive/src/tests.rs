@@ -35,9 +35,8 @@ pub fn generate_tests(args: &Args) -> proc_macro2::TokenStream {
             "digest",
             quote! {
                 #[test]
+                #[tracing_test::traced_test]
                 fn digest() {
-                    use digest::typenum::Unsigned;
-
                     let hash1 = #ident::digest([10u8; 50]);
                     let hash2 = #ident::digest("Lorem ipsum");
 
@@ -54,9 +53,8 @@ pub fn generate_tests(args: &Args) -> proc_macro2::TokenStream {
             "array_convert",
             quote! {
                 #[test]
+                #[tracing_test::traced_test]
                 fn array_convert() {
-                    use digest::typenum::Unsigned;
-
                     let array = [21u8; #con::USIZE];
                     let hybrid_array: digest::array::Array<u8, #con> = array.into();
                     let generic_array: digest::array::Array<u8, #con> = array.into();
@@ -84,9 +82,8 @@ pub fn generate_tests(args: &Args) -> proc_macro2::TokenStream {
             "string_convert",
             quote! {
                 #[test]
+                #[tracing_test::traced_test]
                 fn string_convert() {
-                    use digest::typenum::Unsigned;
-
                     // Create a string padded using 'b' with the expected length (valid hex)
                     let char = if #upper {'B'} else {'b'};
                     let mut b_string = "".to_string();
@@ -102,11 +99,11 @@ pub fn generate_tests(args: &Args) -> proc_macro2::TokenStream {
                     let hash4: #ident = unsafe { #ident::from_inner_unchecked(array) };
 
                     // Debug print
-                    println!("input string (len {}): {b_string}", b_string.len());
-                    println!("hash1 (len {}): {hash1:?}", hash1.len());
-                    println!("hash2 (len {}): {hash2:?}", hash2.len());
-                    println!("hash3 (len {}): {hash3:?}", hash3.len());
-                    println!("hash4 (len {}): {hash4:?}", hash4.len());
+                    info!("input string (len {}): {b_string}", b_string.len());
+                    info!("hash1 (len {}): {hash1:?}", hash1.len());
+                    info!("hash2 (len {}): {hash2:?}", hash2.len());
+                    info!("hash3 (len {}): {hash3:?}", hash3.len());
+                    info!("hash4 (len {}): {hash4:?}", hash4.len());
 
                     // Length correctness
                     assert!(hash1.len() == #con::USIZE * 2);
@@ -126,9 +123,8 @@ pub fn generate_tests(args: &Args) -> proc_macro2::TokenStream {
             "casing",
             quote! {
                 #[test]
+                #[tracing_test::traced_test]
                 fn casing() {
-                    use digest::typenum::Unsigned;
-
                     // Data vars
                     let data_str = "jfkdlasjfie;ajld;nfsdnajejfu3827ura8pdfsL>Vmzx,./vM3/43j2k";
                     let array = [187u8; #con::USIZE]; // Unencoded `bb`
@@ -146,13 +142,13 @@ pub fn generate_tests(args: &Args) -> proc_macro2::TokenStream {
                     let upper_b2 = unsafe { #ident_upper::from_inner_unchecked(hex_upper) };
 
                     // Debug print
-                    println!("lower: {lower:?}");
-                    println!("lower_b1: {lower_b1:?}");
-                    println!("lower_b2: {lower_b2:?}");
-                    println!("====");
-                    println!("upper: {upper:?}");
-                    println!("upper_b1: {upper_b1:?}");
-                    println!("upper_b2: {upper_b2:?}");
+                    info!("lower: {lower:?}");
+                    info!("lower_b1: {lower_b1:?}");
+                    info!("lower_b2: {lower_b2:?}");
+                    info!("====");
+                    info!("upper: {upper:?}");
+                    info!("upper_b1: {upper_b1:?}");
+                    info!("upper_b2: {upper_b2:?}");
 
                     // No `lower` hash should match `upper`
                     assert!(lower != upper);
@@ -187,9 +183,8 @@ pub fn generate_tests(args: &Args) -> proc_macro2::TokenStream {
             "variant_convert",
             quote! {
                 #[test]
+                #[tracing_test::traced_test]
                 fn variant_convert() {
-                    use digest::typenum::Unsigned;
-
                     // Data vars
                     let data_str = "> people are drawn to their own destruction like moths to a flame";
 
@@ -201,8 +196,8 @@ pub fn generate_tests(args: &Args) -> proc_macro2::TokenStream {
                     let upper_hex_to_lower_hex = #ident_lower::from(&upper_hex);
 
                     // Debug print
-                    println!("lower_hex: {lower_hex:?}");
-                    println!("upper_hex: {upper_hex:?}");
+                    info!("lower_hex: {lower_hex:?}");
+                    info!("upper_hex: {upper_hex:?}");
 
                     assert!(lower_hex_to_upper_hex == lower_hex.to_uppercase());
                     assert!(upper_hex_to_lower_hex == upper_hex.to_lowercase());
@@ -213,8 +208,8 @@ pub fn generate_tests(args: &Args) -> proc_macro2::TokenStream {
             "length_error",
             quote! {
                 #[test]
+                #[tracing_test::traced_test]
                 fn length_error() {
-                    use digest::typenum::Unsigned;
                     const N: usize = #con::USIZE;
 
                     let too_long = [20u8; N + 10];
@@ -254,8 +249,8 @@ pub fn generate_tests(args: &Args) -> proc_macro2::TokenStream {
             "hex_error",
             quote! {
                 #[test]
+                #[tracing_test::traced_test]
                 fn hex_error() {
-                    use digest::typenum::Unsigned;
                     const HEX_LEN: usize = #con::USIZE * 2;
 
                     let oops_all_z = fstr::FStr::<HEX_LEN>::from_ascii_filler(b'z');
@@ -318,8 +313,15 @@ pub fn generate_tests(args: &Args) -> proc_macro2::TokenStream {
     // Finally insert the joined tests together into a dedicated module
     quote! {
         #[cfg(test)]
+        #[cfg(feature = "std")]
         mod #mod_ident {
             use super::*;
+            use digest::typenum::Unsigned;
+            use std::string::String;
+            use std::string::ToString;
+            use core::str::FromStr;
+            use tracing::info;
+
             #tests_stream
         }
     }

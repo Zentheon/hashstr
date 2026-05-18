@@ -235,7 +235,7 @@ impl StrWrapperRec {
         // Misc traits
 
         tokens.extend(quote! {
-            impl std::ops::Deref for #ident {
+            impl core::ops::Deref for #ident {
                 type Target = fstr::FStr<#con_int_x2>;
 
                 fn deref(&self) -> &Self::Target {
@@ -243,7 +243,7 @@ impl StrWrapperRec {
                 }
             }
 
-            impl std::ops::DerefMut for #ident {
+            impl core::ops::DerefMut for #ident {
                 fn deref_mut(&mut self) -> &mut Self::Target {
                     &mut self.0
                 }
@@ -261,26 +261,26 @@ impl StrWrapperRec {
                 }
             }
 
-            impl std::fmt::Display for #ident {
-                fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            impl core::fmt::Display for #ident {
+                fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
                     write!(f, "{}", self.0)
                 }
             }
 
-            impl std::hash::Hash for #ident {
-                fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+            impl core::hash::Hash for #ident {
+                fn hash<H: core::hash::Hasher>(&self, state: &mut H) {
                     self.0.hash(state);
                 }
             }
 
             impl PartialOrd for #ident {
-                fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+                fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
                     Some(self.0.cmp(&other.0))
                 }
             }
 
             impl Ord for #ident {
-                fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+                fn cmp(&self, other: &Self) -> core::cmp::Ordering {
                     self.0.cmp(&other.0)
                 }
             }
@@ -301,9 +301,11 @@ impl StrWrapperRec {
                 where
                     D: serde::Deserializer<'de>,
                 {
-                    let inner_string = String::deserialize(deserializer)?;
+                    let inner = fstr::FStr::<#con_int_x2>::deserialize(deserializer)?;
+                    crate::decode_hex::<#con_int_x2, #upper>(&inner, #hash_name_str)
+                        .map_err(serde::de::Error::custom)?;
 
-                    Self::try_from(inner_string).map_err(|e| serde::de::Error::custom(format!("{e}")))
+                    Ok(Self(inner))
                 }
             }
         });
@@ -322,15 +324,16 @@ impl StrWrapperRec {
                 }
             }
 
-            impl TryFrom<String> for #ident {
+            #[cfg(feature = "alloc")]
+            impl TryFrom<alloc::string::String> for #ident {
                 type Error = crate::Error;
 
-                fn try_from(value: String) -> Result<Self, Self::Error> {
+                fn try_from(value: alloc::string::String) -> Result<Self, Self::Error> {
                     Self::from_bytes(value)
                 }
             }
 
-            impl std::str::FromStr for #ident {
+            impl core::str::FromStr for #ident {
                 type Err = crate::Error;
 
                 fn from_str(value: &str) -> Result<Self, Self::Err> {
@@ -455,7 +458,8 @@ impl StrWrapperRec {
         // Implementations should use [`constant_time_eq`]
 
         tokens.extend(quote! {
-            impl PartialEq<#ident> for String {
+            #[cfg(feature = "alloc")]
+            impl PartialEq<#ident> for alloc::string::String {
                 fn eq(&self, other: &#ident) -> bool {
                     constant_time_eq::constant_time_eq(self.as_bytes(), other.as_bytes())
                 }

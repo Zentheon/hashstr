@@ -7,6 +7,7 @@ version = "0.2.0"
 edition = "2024"
 authors = ["Zentheon <zentheon@mailbox.org>"]
 readme = "./README.md"
+license = "LGPL-3.0-or-later"
 license-file = "./LICENSE"
 repository = "https://github.com/Zentheon/hashstr"
 homepage = "https://github.com/Zentheon/hashstr"

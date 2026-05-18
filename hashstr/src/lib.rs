@@ -1,11 +1,15 @@
 #![doc = include_str!("../README.md")]
-
 // Hashers with custom code:
 // blake2
 // blake3
 // sha1_checked
+#![no_std]
 
-use std::fmt::Display;
+#[cfg(feature = "alloc")]
+extern crate alloc;
+#[cfg(feature = "std")]
+#[macro_use]
+extern crate std;
 
 use fstr::FStr;
 
@@ -118,26 +122,36 @@ pub const fn convert_hex_case_fstr<const HEX_LEN: usize, const TO_UPPER: bool>(
     unsafe { FStr::from_inner_unchecked(hex_array) }
 }
 
-#[test]
-fn test_convert_hex_case_fstr() {
-    let hex1: FStr<6> = FStr::from_str_unwrap("f2ad9a");
-    let hex2: FStr<12> = FStr::from_str_unwrap("adFcAaaBCCfd");
-    let hex3: FStr<12> = FStr::from_str_unwrap("AABBCCDDEEFF");
+#[cfg(test)]
+#[cfg(feature = "std")]
+mod tests {
+    use super::*;
+    use std::string::String;
+    use std::string::ToString;
+    use tracing::info;
 
-    println!("hex1: {hex1}");
-    println!("hex2: {hex2}");
-    println!("hex3: {hex3}");
-    println!("hex array: {:?}", hex3.as_bytes().as_array::<12>().unwrap());
+    #[test]
+    #[tracing_test::traced_test]
+    fn test_convert_hex_case_fstr() {
+        let hex1: FStr<6> = FStr::from_str_unwrap("f2ad9a");
+        let hex2: FStr<12> = FStr::from_str_unwrap("adFcAaaBCCfd");
+        let hex3: FStr<12> = FStr::from_str_unwrap("AABBCCDDEEFF");
 
-    let lower_array = convert_hex_case::<12, true>(&hex3.as_bytes());
-    let lower1 = convert_hex_case_fstr::<6, false>(&hex1);
-    let upper1 = convert_hex_case_fstr::<6, true>(&hex1);
+        info!("hex1: {hex1}");
+        info!("hex2: {hex2}");
+        info!("hex3: {hex3}");
+        info!("hex array: {:?}", hex3.as_bytes().as_array::<12>().unwrap());
 
-    println!("lower1: {lower1}");
-    println!("hex array to lower: {:?}", lower_array);
+        let lower_array = convert_hex_case::<12, true>(&hex3.as_bytes());
+        let lower1 = convert_hex_case_fstr::<6, false>(&hex1);
+        let upper1 = convert_hex_case_fstr::<6, true>(&hex1);
 
-    assert!(upper1 != lower1);
-    assert!(upper1 == lower1.to_uppercase());
+        info!("lower1: {lower1}");
+        info!("hex array to lower: {:?}", lower_array);
+
+        assert!(upper1 != lower1);
+        assert!(upper1 == lower1.to_uppercase());
+    }
 }
 
 /// Encodes a byte slice to an [`FStr`] in hexadecimal
@@ -221,7 +235,7 @@ pub const fn check_len<const N: usize>(value: &[u8], hash_name: &'static str) ->
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq, PartialOrd, Ord)]
 pub struct LengthError {
     pub(crate) expected: usize,
     pub(crate) actual: usize,
@@ -240,7 +254,7 @@ impl LengthError {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq, PartialOrd, Ord)]
 pub struct EncodingError {
     pub(crate) hash_name: &'static str,
 }
@@ -251,14 +265,14 @@ impl EncodingError {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq, PartialOrd, Ord)]
 pub enum Error {
     LengthError(LengthError),
     EncodingError(EncodingError),
 }
 
-impl Display for Error {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Display for Error {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
             Self::LengthError(e) => write!(f, "{e}"),
             Self::EncodingError(e) => write!(f, "{e}"),
@@ -297,12 +311,12 @@ impl Error {
     }
 }
 
-impl std::error::Error for LengthError {}
-impl std::error::Error for EncodingError {}
-impl std::error::Error for Error {}
+impl core::error::Error for LengthError {}
+impl core::error::Error for EncodingError {}
+impl core::error::Error for Error {}
 
-impl Display for LengthError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Display for LengthError {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(
             f,
             "Invalid {} length of {} (expected: {})",
@@ -311,8 +325,8 @@ impl Display for LengthError {
     }
 }
 
-impl Display for EncodingError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Display for EncodingError {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "Characters in {} should be hexadecimal", self.hash_name)
     }
 }

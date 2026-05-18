@@ -58,6 +58,7 @@ impl HashStrDigestRec {
                 /// Attempts to digest the entirety of the given reader.
                 ///
                 /// Returns errors produced by [`std::io::copy`]
+                #[cfg(feature = "std")]
                 pub fn digest_reader<R>(read: &mut R) -> Result<Self, std::io::Error>
                 where
                     R: Sized,
@@ -73,6 +74,7 @@ impl HashStrDigestRec {
                 /// Attempts to open the given path and digest the entirety of its bytes.
                 ///
                 /// Returns errors produced by [`std::fs::File::open`] and [`std::io::copy`]
+                #[cfg(feature = "std")]
                 pub fn digest_file(path: impl AsRef<std::path::Path>) -> Result<Self, std::io::Error> {
                     #digest_file
 
