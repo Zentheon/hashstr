@@ -228,9 +228,9 @@ pub fn impl_hash_str_tests(input: TokenStream) -> TokenStream {
                     const HEX_LEN: usize = #con::USIZE * 2;
 
                     let oops_all_z = fstr::FStr::<HEX_LEN>::from_ascii_filler(b'z');
-                    let mut slice = fstr::FStr::<HEX_LEN>::from_ascii_filler(b'a').into_inner();
+                    let mut slice = fstr::FStr::<HEX_LEN>::from_ascii_filler(b'a').into_bytes();
                     slice[HEX_LEN / 2] = 'g' as u8;
-                    let single_bad_char = fstr::FStr::from_inner(slice).unwrap();
+                    let single_bad_char = fstr::FStr::from_bytes(slice).unwrap();
 
                     let res1 = #ident::try_from(oops_all_z);
                     let res2 = #ident::from_hex(single_bad_char);
