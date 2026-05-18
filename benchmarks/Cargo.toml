@@ -23,7 +23,7 @@ const-hex = "1.18.1"
 base16ct = { version = "1.0.0", features = ["alloc"] }
 base64ct = "1.8.3"
 hashstr = { version = "0.2.0", path = "../hashstr", features = ["sha1", "sha3", "blake3"] }
-sha3 = "0.11.0"
+sha3 = "0.12.0"
 typenum = "1.20.0"
 criterion = "0.8.2"
 
