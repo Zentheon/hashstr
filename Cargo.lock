@@ -311,9 +311,9 @@ dependencies = [
 
 [[package]]
 name = "fstr"
-version = "0.2.18"
+version = "0.2.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0634b3c417af19554d4eba92c495ce4c2d5e10d5c21cfa20cba8b10c1d4a2694"
+checksum = "53330ae61ec107fd3b0548503d0b1003d6ad5a9c534796a062aea966291c135f"
 
 [[package]]
 name = "generic-array"
