@@ -119,7 +119,7 @@ impl StrWrapperRec {
 
                     // SAFETY: Length and encoding has already been checked above.
                     Ok(Self(unsafe {
-                        fstr::FStr::from_bytes_unchecked(
+                        fstr::FStr::from_inner_unchecked(
                             crate::convert_hex_case::<#con_int_x2, #upper>(value.as_bytes().as_array().unwrap())
                         )
                     }))
@@ -129,7 +129,7 @@ impl StrWrapperRec {
                 /// # Safety
                 #[doc = concat!("Input value must, at minimum, be valid UTF-8, and __should__ be ", #casing, "case hexadecimal.")]
                 pub const unsafe fn from_hex_unchecked(value: [u8; #con_int_x2]) -> Self {
-                    Self(unsafe { fstr::FStr::<#con_int_x2>::from_bytes_unchecked(value) })
+                    Self(unsafe { fstr::FStr::<#con_int_x2>::from_inner_unchecked(value) })
                 }
                 /// Returns an uppercase hexadecimal [`fstr::FStr`] of the hash.
                 ///

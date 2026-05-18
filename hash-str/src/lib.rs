@@ -108,14 +108,14 @@ pub const fn convert_hex_case_fstr<const HEX_LEN: usize, const TO_UPPER: bool>(
     hex: &FStr<HEX_LEN>,
 ) -> FStr<HEX_LEN> {
     let hex_array = convert_hex_case::<HEX_LEN, TO_UPPER>(hex.as_bytes());
-    unsafe { FStr::from_bytes_unchecked(hex_array) }
+    unsafe { FStr::from_inner_unchecked(hex_array) }
 }
 
 #[test]
 fn test_convert_hex_case_fstr() {
-    let hex1: FStr<6> = FStr::try_from("f2ad9a").unwrap();
-    let hex2: FStr<12> = FStr::try_from("adFcAaaBCCfd").unwrap();
-    let hex3: FStr<12> = FStr::try_from("AABBCCDDEEFF").unwrap();
+    let hex1: FStr<6> = FStr::from_str_unwrap("f2ad9a");
+    let hex2: FStr<12> = FStr::from_str_unwrap("adFcAaaBCCfd");
+    let hex3: FStr<12> = FStr::from_str_unwrap("AABBCCDDEEFF");
 
     println!("hex1: {hex1}");
     println!("hex2: {hex2}");
@@ -158,7 +158,7 @@ pub fn encode_hex<const HEX_LEN: usize>(
     match encode {
         // SAFETY: Must be valid utf-8. Should already be well within bounds after the hex
         // encode
-        Ok(_) => Ok(unsafe { FStr::from_bytes_unchecked(hex) }),
+        Ok(_) => Ok(unsafe { FStr::from_inner_unchecked(hex) }),
         Err(err) => Err(Error::from_hex_err(
             err,
             HEX_LEN / 2,
@@ -179,7 +179,7 @@ pub const fn encode_hex_const<const HEX_LEN: usize, const UPPER: bool>(
     };
     // SAFETY: Must be valid utf-8. Should already be well within bounds after the hex
     // encode
-    unsafe { FStr::from_bytes_unchecked(*buf.as_byte_array()) }
+    unsafe { FStr::from_inner_unchecked(*buf.as_byte_array()) }
 }
 
 /// Builds an [`Error`] if the input value length is not `N`
