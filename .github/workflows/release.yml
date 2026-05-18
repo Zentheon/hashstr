@@ -1,6 +1,6 @@
-name: Publish
+name: Build, test and publish release
 
-# TODO: Figure out how to IO built packages.
+# TODO: Figure out how to IO built binaries.
 
 # This workflow has two jobs:
 # crates-publish:
@@ -11,28 +11,27 @@ name: Publish
 #   the pushed tag and creates a new release with those inputs.
 
 on:
-  workflow_dispatch:
+  push:
+    tags: [ '[1-9]+.[0-9]+.[0-9]+' ]
 
 permissions:
   contents: read
 
 jobs:
   crates-publish:
-    name: Build, test and publish package
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      runs-on: ubuntu-latest
+      environment: release
+      permissions:
+        id-token: write # Required for OIDC token exchange
+      steps:
+      - uses: actions/checkout@v6
 
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: nightly
-          override: true
+      - uses: rust-lang/crates-io-auth-action@v1
+        id: auth
 
-      - uses: katyo/publish-crates@v2
-        with:
-          args: '--manifest-path ./crate/Cargo.toml'
-          registry-token: ${{ secrets.CRATES_IO_TOKEN }}
+      - run: cargo publish
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
