@@ -121,20 +121,20 @@ impl StrWrapperRec {
                         let hex = crate::encode_hex::<#con_int_x2>(value, #upper, #hash_name_str).unwrap();
                         Self(hex)
                     }
-                    #[doc = concat!("Convert a ", #casing, "case hex-encoded str into a hash str.")]
+                    #[doc = concat!("Convert ", #casing, "case hex-encoded bytes into a hash str.")]
                     ///
                     /// Most of the string-related [`TryFrom`] impls use this method.
-                    pub fn from_str(value: impl AsRef<str>) -> Result<Self, crate::Error> {
-                        let value = value.as_ref();
-
-                        crate::decode_hex::<#con_int_x2, #upper>(value, #hash_name_str)?;
+                    pub fn from_bytes(value: impl AsRef<[u8]>) -> Result<Self, crate::Error> {
+                        crate::decode_hex::<#con_int_x2, #upper>(&value, #hash_name_str)?;
 
                         // SAFETY: Length and encoding has already been checked above.
                         Ok(Self(unsafe {
-                            fstr::FStr::from_inner_unchecked(
-                                crate::convert_hex_case::<#con_int_x2, #upper>(value.as_bytes().as_array().unwrap())
-                            )
+                            fstr::FStr::from_inner_unchecked(value.as_ref().as_array().unwrap().clone())
                         }))
+                    }
+                    #[doc = concat!("Convert a ", #casing, "case hex-encoded array into a hash str.")]
+                    pub fn from_slice(value: &[u8; #con_int_x2]) -> Result<Self, crate::Error> {
+                        Self::from_bytes(value)
                     }
                     /// Returns an uppercase hexadecimal [`fstr::FStr`] of the hash.
                     ///
@@ -318,7 +318,7 @@ impl StrWrapperRec {
                 type Error = crate::Error;
 
                 fn try_from(value: &str) -> Result<Self, Self::Error> {
-                    Self::from_str(value)
+                    Self::from_bytes(value)
                 }
             }
 
@@ -326,7 +326,7 @@ impl StrWrapperRec {
                 type Error = crate::Error;
 
                 fn try_from(value: String) -> Result<Self, Self::Error> {
-                    Self::from_str(value)
+                    Self::from_bytes(value)
                 }
             }
 
@@ -334,7 +334,7 @@ impl StrWrapperRec {
                 type Err = crate::Error;
 
                 fn from_str(value: &str) -> Result<Self, Self::Err> {
-                    Self::from_str(value)
+                    Self::from_bytes(value)
                 }
             }
 
@@ -350,7 +350,7 @@ impl StrWrapperRec {
                 type Error = crate::Error;
 
                 fn try_from(value: &fstr::FStr<#con_int_x2>) -> Result<Self, Self::Error> {
-                    Self::from_str(value)
+                    Self::from_bytes(value)
                 }
             }
 
@@ -358,7 +358,7 @@ impl StrWrapperRec {
                 type Error = crate::Error;
 
                 fn try_from(value: fstr::FStr<#con_int_x2>) -> Result<Self, Self::Error> {
-                    Self::from_str(value)
+                    Self::from_bytes(value)
                 }
             }
 

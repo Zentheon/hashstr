@@ -264,7 +264,7 @@ pub fn generate_tests(args: &Args) -> proc_macro2::TokenStream {
                     let single_bad_char = fstr::FStr::from_inner(slice).unwrap();
 
                     let res1 = #ident::try_from(oops_all_z);
-                    let res2 = #ident::from_str(single_bad_char);
+                    let res2 = #ident::from_str(single_bad_char.as_str());
 
                     match res1 {
                         Err(crate::Error::EncodingError(crate::EncodingError {
