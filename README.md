@@ -72,7 +72,7 @@ fn default() -> Self {
     Self::digest([])
 }
 ```
-This results in the hash of digesting exactly nothing. In the case of [`sha2::Sha256`](https://docs.rs/sha2/0.11.0/sha2/struct.Sha224.html) specifically...
+This results in the hash of digesting exactly nothing. In the case of [`sha2::Sha256`](https://docs.rs/sha2/latest/sha2/struct.Sha224.html) specifically...
 ```rust
 use hashstr::sha2::Sha256Str;
 
@@ -82,7 +82,7 @@ assert!(Sha256Str::default() == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934
 ## Efficiency
 `hashstr`s aren't just convenient, they're efficient!
 
-* All types wrap [fstr](https://docs.rs/fstr/0.2.18/fstr/) under the hood, which allows for fixed-sized [`str`]-likes. 
+* All types wrap [fstr](https://docs.rs/fstr/latest/fstr/) under the hood, which allows for fixed-sized [`str`]-likes. 
 * Encoding is done with [`const_hex`](https://docs.rs/const-hex/latest)
 * `PartialEq` impls use [constant_time_eq](https://docs.rs/constant_time_eq/latest) for best practice. 
 * Casing conversion uses a purpose-built function.

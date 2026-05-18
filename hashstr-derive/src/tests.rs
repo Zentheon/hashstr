@@ -87,7 +87,7 @@ pub fn generate_tests(args: &Args) -> proc_macro2::TokenStream {
                     // Create a string padded using 'b' with the expected length (valid hex)
                     let char = if #upper {'B'} else {'b'};
                     let mut b_string = "".to_string();
-                    for i in 0..#con::USIZE * 2 {
+                    for _ in 0..#con::USIZE * 2 {
                         b_string.push(char);
                     }
 
@@ -254,9 +254,9 @@ pub fn generate_tests(args: &Args) -> proc_macro2::TokenStream {
                     const HEX_LEN: usize = #con::USIZE * 2;
 
                     let oops_all_z = fstr::FStr::<HEX_LEN>::from_ascii_filler(b'z');
-                    let mut slice = fstr::FStr::<HEX_LEN>::from_ascii_filler(b'a').into_inner();
+                    let mut slice = fstr::FStr::<HEX_LEN>::from_ascii_filler(b'a').into_bytes();
                     slice[HEX_LEN / 2] = 'g' as u8;
-                    let single_bad_char = fstr::FStr::from_inner(slice).unwrap();
+                    let single_bad_char = fstr::FStr::from_bytes(slice).unwrap();
 
                     let res1 = #ident::try_from(oops_all_z);
                     let res2 = #ident::from_str(single_bad_char.as_str());

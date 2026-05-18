@@ -96,7 +96,7 @@ impl StrWrapperRec {
                 /// # Safety
                 #[doc = concat!("Input value must, at minimum, be valid UTF-8, and __should__ be ", #casing, "case hexadecimal.")]
                 pub const unsafe fn from_inner_unchecked(value: [u8; #con_int_x2]) -> Self {
-                    Self(unsafe { fstr::FStr::<#con_int_x2>::from_inner_unchecked(value) })
+                    Self(unsafe { fstr::FStr::<#con_int_x2>::from_bytes_unchecked(value) })
                 }
             }
         });
@@ -129,7 +129,7 @@ impl StrWrapperRec {
 
                         // SAFETY: Length and encoding has already been checked above.
                         Ok(Self(unsafe {
-                            fstr::FStr::from_inner_unchecked(value.as_ref().as_array().unwrap().clone())
+                            fstr::FStr::from_bytes_unchecked(value.as_ref().as_array().unwrap().clone())
                         }))
                     }
                     #[doc = concat!("Convert a ", #casing, "case hex-encoded array into a hash str.")]
@@ -174,7 +174,7 @@ impl StrWrapperRec {
                         let mut array = [0u8; base64_encoded_len(64)];
                         base64ct::Base64::encode(bytes, &mut array).unwrap();
                         // SAFETY: Output of base64ct encode methods are UTF8 in the ASCII range.
-                        Ok(Self(unsafe { fstr::FStr::from_inner_unchecked(array) }))
+                        Ok(Self(unsafe { fstr::FStr::from_bytes_unchecked(array) }))
                     }
                     /// Encodes a raw hash slice into default, padded base64
                     ///
@@ -183,7 +183,7 @@ impl StrWrapperRec {
                         let mut array = [0u8; base64_encoded_len(64)];
                         base64ct::Base64::encode(value, &mut array).unwrap();
                         // SAFETY: Output of base64ct encode methods are UTF8 in the ASCII range.
-                        Self(unsafe { fstr::FStr::from_inner_unchecked(array) })
+                        Self(unsafe { fstr::FStr::from_bytes_unchecked(array) })
                     }
                     /// Encodes a raw hash slice into url-safe, padded base64
                     ///
@@ -192,7 +192,7 @@ impl StrWrapperRec {
                         let mut array = [0u8; base64_encoded_len(64)];
                         base64ct::Base64Url::encode(value, &mut array).unwrap();
                         // SAFETY: Output of base64ct encode methods are UTF8 in the ASCII range.
-                        Self(unsafe { fstr::FStr::from_inner_unchecked(array) })
+                        Self(unsafe { fstr::FStr::from_bytes_unchecked(array) })
                     }
                     /// Encodes a raw hash slice into bcrypt, padded base64
                     ///
@@ -201,7 +201,7 @@ impl StrWrapperRec {
                         let mut array = [0u8; base64_encoded_len(64)];
                         base64ct::Base64Bcrypt::encode(value, &mut array).unwrap();
                         // SAFETY: Output of base64ct encode methods are UTF8 in the ASCII range.
-                        Self(unsafe { fstr::FStr::from_inner_unchecked(array) })
+                        Self(unsafe { fstr::FStr::from_bytes_unchecked(array) })
                     }
                     /// Encodes a raw hash slice into shacrypt, padded base64
                     ///
@@ -210,7 +210,7 @@ impl StrWrapperRec {
                         let mut array = [0u8; base64_encoded_len(64)];
                         base64ct::Base64ShaCrypt::encode(value, &mut array).unwrap();
                         // SAFETY: Output of base64ct encode methods are UTF8 in the ASCII range.
-                        Self(unsafe { fstr::FStr::from_inner_unchecked(array) })
+                        Self(unsafe { fstr::FStr::from_bytes_unchecked(array) })
                     }
                     #[doc = concat!("Convert a ", #casing, "case hex-encoded str into a hash str.")]
                     ///
@@ -223,7 +223,7 @@ impl StrWrapperRec {
 
                         // SAFETY: Length and encoding has already been checked above.
                         Ok(Self(unsafe {
-                            fstr::FStr::from_inner_unchecked(
+                            fstr::FStr::from_bytes_unchecked(
                                 crate::convert_hex_case::<#con_int_x2, #upper>(value.as_bytes().as_array().unwrap())
                             )
                         }))
