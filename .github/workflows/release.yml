@@ -124,13 +124,6 @@ jobs:
         run: |
           awk '/^## ${{ github.ref_name }} -/ {flag=1; next} /^- - -/ {flag=0} flag' ${{ github.workspace }}/release-artifacts/CHANGELOG.md > ${{ github.workspace }}/release_body.md
 
-      - name: Attest release
-        id: attest
-        uses: actions/attest@v4
-        with:
-          subject-path: ${{ github.workspace }}/release-artifacts/target/package/*.crate
-          sbom-path: ${{ github.workspace }}/release-artifacts/hashstr/hashstr.cdx.json
-
       - name: Create release
         uses: softprops/action-gh-release@v3
         with:
