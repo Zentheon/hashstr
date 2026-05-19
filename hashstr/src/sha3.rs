@@ -1,5 +1,3 @@
-#![doc = include_str!("../../README.md")]
-
 use digest::consts::{U28, U32, U48, U64, U200};
 use hashstr_derive::impl_hashstr;
 use sha3::{
