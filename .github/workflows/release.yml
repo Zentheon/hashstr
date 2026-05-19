@@ -115,7 +115,7 @@ jobs:
       id-token: write
     steps:
       - name: Retrieve artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v7
         with:
           path: ${{ github.workspace }}/release-artifacts
           name: release-artifacts
@@ -132,7 +132,7 @@ jobs:
           sbom-path: ${{ github.workspace }}/release-artifacts/*.cdx.json
 
       - name: Create release
-        uses: softprops/action-gh-release@v3
+        uses: softprops/action-gh-release@v7
         with:
           draft: true # remove this line if nothing explodes
           body_path: ${{ github.workspace }}/release_body.md
