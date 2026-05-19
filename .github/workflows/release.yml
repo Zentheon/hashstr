@@ -16,9 +16,6 @@ on:
   push:
     tags: [ '[0-9]+.[0-9]+.[0-9]+' ]
 
-permissions:
-  contents: read
-
 jobs:
   build-and-test:
       name: Build + test, generate and check SBOM
@@ -56,6 +53,7 @@ jobs:
       - name: Scan SBOMs
         uses: anchore/scan-action@v7
         with:
+          # https://github.com/anchore/scan-action/issues/673
           sbom: ${{ github.workspace }}/hashstr/hashstr.cdx.json
 
       - name: Upload artifacts for Github release
@@ -65,7 +63,7 @@ jobs:
           retention-days: 1
           if-no-files-found: error
           path: |
-            ${{ github.workspace }}/target/packages/*.crate
+            ${{ github.workspace }}/target/package/*.crate
             ${{ github.workspace }}/CHANGELOG.md
             ${{ github.workspace }}/*/*.cdx.xml
             ${{ github.workspace }}/*/*.cdx.json
