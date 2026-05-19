@@ -128,7 +128,7 @@ jobs:
         id: attest
         uses: actions/attest@v4
         with:
-          subject-path: ${{ github.workspace }}/release-artifacts/*.crate
+          subject-path: ${{ github.workspace }}/release-artifacts/target/package/*.crate
           sbom-path: ${{ github.workspace }}/release-artifacts/*.cdx.json
 
       - name: Create release
