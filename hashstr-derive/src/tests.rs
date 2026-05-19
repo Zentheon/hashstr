@@ -96,7 +96,7 @@ pub fn generate_tests(args: &Args) -> proc_macro2::TokenStream {
                     let hash1: #ident = b_string.as_str().try_into().unwrap();
                     let hash2: #ident = b_string.clone().try_into().unwrap();
                     let hash3: #ident = #ident::from_str(b_string.as_str()).unwrap();
-                    let hash4: #ident = unsafe { #ident::from_inner_unchecked(array) };
+                    let hash4: #ident = unsafe { #ident::from_array_unchecked(array) };
 
                     // Debug print
                     info!("input string (len {}): {b_string}", b_string.len());
@@ -134,12 +134,12 @@ pub fn generate_tests(args: &Args) -> proc_macro2::TokenStream {
                     // Lowercase hashes
                     let lower = #ident_lower::digest(data_str);
                     let lower_b1 = #ident_lower::from(array);
-                    let lower_b2 = unsafe { #ident_lower::from_inner_unchecked(hex_lower) };
+                    let lower_b2 = unsafe { #ident_lower::from_array_unchecked(hex_lower) };
 
                     // Uppercase hashes
                     let upper = #ident_upper::digest(data_str);
                     let upper_b1 = #ident_upper::from(array);
-                    let upper_b2 = unsafe { #ident_upper::from_inner_unchecked(hex_upper) };
+                    let upper_b2 = unsafe { #ident_upper::from_array_unchecked(hex_upper) };
 
                     // Debug print
                     info!("lower: {lower:?}");

@@ -133,9 +133,9 @@ mod tests {
     #[test]
     #[tracing_test::traced_test]
     fn test_convert_hex_case_fstr() {
-        let hex1: FStr<6> = FStr::from_str_unwrap("f2ad9a");
-        let hex2: FStr<12> = FStr::from_str_unwrap("adFcAaaBCCfd");
-        let hex3: FStr<12> = FStr::from_str_unwrap("AABBCCDDEEFF");
+        let hex1: FStr<6> = FStr::from_str_const("f2ad9a");
+        let hex2: FStr<12> = FStr::from_str_const("adFcAaaBCCfd");
+        let hex3: FStr<12> = FStr::from_str_const("AABBCCDDEEFF");
 
         info!("hex1: {hex1}");
         info!("hex2: {hex2}");

@@ -91,11 +91,11 @@ impl StrWrapperRec {
                 {
                     self.0
                 }
-                /// Convert a hex slice into a hash str.
+                /// Convert a hex array into a hash str.
                 ///
                 /// # Safety
-                #[doc = concat!("Input value must, at minimum, be valid UTF-8, and __should__ be ", #casing, "case hexadecimal.")]
-                pub const unsafe fn from_inner_unchecked(value: [u8; #con_int_x2]) -> Self {
+                #[doc = concat!("Input value must, at minimum, be valid UTF-8 ASCII, and __should__ be ", #casing, "case hexadecimal.")]
+                pub const unsafe fn from_array_unchecked(value: [u8; #con_int_x2]) -> Self {
                     Self(unsafe { fstr::FStr::<#con_int_x2>::from_bytes_unchecked(value) })
                 }
             }
@@ -117,7 +117,7 @@ impl StrWrapperRec {
                         Ok(Self(hex))
                     }
                     /// Encode a raw hash array into a hash str.
-                    pub fn encode_slice(value: &[u8; #con_int]) -> Self {
+                    pub fn encode_array(value: &[u8; #con_int]) -> Self {
                         let hex = crate::encode_hex::<#con_int_x2>(value, #upper, #hash_name_str).unwrap();
                         Self(hex)
                     }
@@ -133,7 +133,7 @@ impl StrWrapperRec {
                         }))
                     }
                     #[doc = concat!("Convert a ", #casing, "case hex-encoded array into a hash str.")]
-                    pub fn from_slice(value: &[u8; #con_int_x2]) -> Result<Self, crate::Error> {
+                    pub fn from_array(value: &[u8; #con_int_x2]) -> Result<Self, crate::Error> {
                         Self::from_bytes(value)
                     }
                     /// Returns an uppercase hexadecimal [`fstr::FStr`] of the hash.
@@ -176,57 +176,41 @@ impl StrWrapperRec {
                         // SAFETY: Output of base64ct encode methods are UTF8 in the ASCII range.
                         Ok(Self(unsafe { fstr::FStr::from_bytes_unchecked(array) }))
                     }
-                    /// Encodes a raw hash slice into default, padded base64
+                    /// Encodes a raw hash array into default, padded base64
                     ///
                     /// See [`base64ct::Base64`] for specifics.
-                    fn encode_slice(value: &[u8; 64]) -> Self {
+                    fn encode_array(value: &[u8; 64]) -> Self {
                         let mut array = [0u8; base64_encoded_len(64)];
                         base64ct::Base64::encode(value, &mut array).unwrap();
                         // SAFETY: Output of base64ct encode methods are UTF8 in the ASCII range.
                         Self(unsafe { fstr::FStr::from_bytes_unchecked(array) })
                     }
-                    /// Encodes a raw hash slice into url-safe, padded base64
+                    /// Encodes a raw hash array into url-safe, padded base64
                     ///
                     /// See [`base64ct::Base64Url`] for specifics.
-                    fn encode_slice_url_safe(value: &[u8; 64]) -> Self {
+                    fn encode_array_url_safe(value: &[u8; 64]) -> Self {
                         let mut array = [0u8; base64_encoded_len(64)];
                         base64ct::Base64Url::encode(value, &mut array).unwrap();
                         // SAFETY: Output of base64ct encode methods are UTF8 in the ASCII range.
                         Self(unsafe { fstr::FStr::from_bytes_unchecked(array) })
                     }
-                    /// Encodes a raw hash slice into bcrypt, padded base64
+                    /// Encodes a raw hash array into bcrypt, padded base64
                     ///
                     /// See [`base64ct::Base64Bcrypt`] for specifics.
-                    fn encode_slice_bcrypt(value: &[u8; 64]) -> Self {
+                    fn encode_array_bcrypt(value: &[u8; 64]) -> Self {
                         let mut array = [0u8; base64_encoded_len(64)];
                         base64ct::Base64Bcrypt::encode(value, &mut array).unwrap();
                         // SAFETY: Output of base64ct encode methods are UTF8 in the ASCII range.
                         Self(unsafe { fstr::FStr::from_bytes_unchecked(array) })
                     }
-                    /// Encodes a raw hash slice into shacrypt, padded base64
+                    /// Encodes a raw hash array into shacrypt, padded base64
                     ///
                     /// See [`base64ct::Base64ShaCrypt`] for specifics.
-                    fn encode_slice_shacrypt(value: &[u8; 64]) -> Self {
+                    fn encode_array_shacrypt(value: &[u8; 64]) -> Self {
                         let mut array = [0u8; base64_encoded_len(64)];
                         base64ct::Base64ShaCrypt::encode(value, &mut array).unwrap();
                         // SAFETY: Output of base64ct encode methods are UTF8 in the ASCII range.
                         Self(unsafe { fstr::FStr::from_bytes_unchecked(array) })
-                    }
-                    #[doc = concat!("Convert a ", #casing, "case hex-encoded str into a hash str.")]
-                    ///
-                    /// Most of the string-related [`TryFrom`] impls use this method.
-                    pub fn from_inner(value: impl AsRef<str>) -> Result<Self, crate::Error> {
-                        let value = value.as_ref();
-                        crate::check_len::<#con_int_x2>(value.as_ref(), #hash_name_str)?;
-                        base16ct::lower::decode(value, &mut decoded)
-                            .map_err(|_| crate::Error::EncodingError(EncodingError { #hash_name_str }))?;
-
-                        // SAFETY: Length and encoding has already been checked above.
-                        Ok(Self(unsafe {
-                            fstr::FStr::from_bytes_unchecked(
-                                crate::convert_hex_case::<#con_int_x2, #upper>(value.as_bytes().as_array().unwrap())
-                            )
-                        }))
                     }
                 }
             });
