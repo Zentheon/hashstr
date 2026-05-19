@@ -129,7 +129,7 @@ jobs:
         uses: actions/attest@v4
         with:
           subject-path: ${{ github.workspace }}/release-artifacts/target/package/*.crate
-          sbom-path: ${{ github.workspace }}/release-artifacts/*/*.cdx.json
+          sbom-path: ${{ github.workspace }}/release-artifacts/hashstr/hashstr.cdx.json
 
       - name: Create release
         uses: softprops/action-gh-release@v3
