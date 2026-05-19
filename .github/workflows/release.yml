@@ -10,7 +10,7 @@ name: Build, test and publish release
 #   Publish the release to crates.io
 #
 # github-release:
-#   Retrieves the `release-artifacts` from `build-and-test`, attests and creates a release with those files
+#   Retrieves the `release-artifacts` from `build-and-test` and creates a release with those files
 
 on:
   push:
@@ -100,8 +100,7 @@ jobs:
       uses: rust-lang/crates-io-auth-action@v1
 
     - name: Publish release to crates.io
-      # remove the -n flag if nothing explodes
-      run: cargo publish -n
+      run: cargo publish
       env:
         CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
 
@@ -127,7 +126,6 @@ jobs:
       - name: Create release
         uses: softprops/action-gh-release@v3
         with:
-          draft: true # remove this line if nothing explodes
           body_path: ${{ github.workspace }}/release_body.md
           files: |
             ${{ steps.attest.outputs.bundle-path }}
