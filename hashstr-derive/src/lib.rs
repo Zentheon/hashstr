@@ -1,4 +1,5 @@
 #![feature(decl_macro)]
+#![allow(linker_messages)]
 
 extern crate proc_macro;
 

@@ -62,13 +62,6 @@ pub mod tiger;
 #[cfg(feature = "whirlpool")]
 pub mod whirlpool;
 
-/// formula to get the required character slots (including padding space).
-///
-/// base64ct already has a method to do this, except it is not const.
-const fn base64_encoded_len(bytes: usize) -> usize {
-    ((bytes + 2) / 3) * 4
-}
-
 /// The table of lowercase letters (no numbers).
 pub const HEX_LETTERS_LOWER: &[u8; 6] = b"abcdef";
 
@@ -276,37 +269,6 @@ impl core::fmt::Display for Error {
         match self {
             Self::LengthError(e) => write!(f, "{e}"),
             Self::EncodingError(e) => write!(f, "{e}"),
-        }
-    }
-}
-
-impl Error {
-    pub(crate) fn from_fstr_err<T>(
-        res: Result<T, fstr::LengthError>,
-        name: &'static str,
-    ) -> Result<T, Error> {
-        match res {
-            Ok(v) => Ok(v),
-            Err(e) => Err(Error::LengthError(LengthError {
-                expected: e.expected(),
-                actual: e.actual(),
-                hash_name: name,
-            })),
-        }
-    }
-    pub(crate) const fn from_hex_err(
-        err: base16ct::Error,
-        expected: usize,
-        actual: usize,
-        hash_name: &'static str,
-    ) -> Error {
-        match err {
-            base16ct::Error::InvalidEncoding => Error::EncodingError(EncodingError { hash_name }),
-            base16ct::Error::InvalidLength => Error::LengthError(LengthError {
-                expected: expected,
-                actual: actual,
-                hash_name,
-            }),
         }
     }
 }
