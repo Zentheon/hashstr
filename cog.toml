@@ -9,11 +9,11 @@ branch_whitelist = []
 skip_ci = "[skip ci]"
 skip_untracked = false
 pre_bump_hooks = [
-    "cargo check",
     "cargo test --all-features",
     "bump-crate {{version}} */Cargo.toml",
     "bump-dep hashstr {{version}} */Cargo.toml",
     "bump-dep hashstr-derive {{version}} */Cargo.toml",
+    "cargo check",
 ]
 post_bump_hooks = []
 pre_package_bump_hooks = []
