@@ -2,63 +2,140 @@ name: Build, test and publish release
 
 # TODO: Figure out how to IO built binaries.
 
-# This workflow has two jobs:
-# crates-publish:
-#   Publish the crate to crates.io and creates a build artifact for github-publish
+# This workflow contains three jobs, each a dependent of the next:
+# build-and-test:
+#   Build and test packages, generate SBOMs, attest and upload relevant artifacts
 #
-# github-publish:
-#   Fetches build-artifact and checks out CHANGELOG.md. Retrieves the changelog section relating to
-#   the pushed tag and creates a new release with those inputs.
+# crates-io-release:
+#   Publish the release to crates.io
+#
+# github-release:
+#   Retrieves the `release-artifact` from `build-and-test` and creates a release with those files
 
 on:
   push:
-    tags: [ '[1-9]+.[0-9]+.[0-9]+' ]
+    tags: [ '[0-9]+.[0-9]+.[0-9]+' ]
 
 permissions:
   contents: read
 
 jobs:
-  crates-publish:
+  build-and-test:
+      name: Build + test, generate and check SBOM
       runs-on: ubuntu-latest
       environment: release
-      permissions:
-        id-token: write # Required for OIDC token exchange
+      defaults:
+        run:
+          shell: devenv shell bash -- -e {0}
+
       steps:
-      - uses: actions/checkout@v6
+      - name: Checkout repository
+        uses: actions/checkout@v6
 
-      - uses: rust-lang/crates-io-auth-action@v1
-        id: auth
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
 
-      - run: cargo publish
-        env:
-          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
-
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+      - name: Setup Cachix
+        uses: cachix/cachix-action@v16
         with:
-          name: build-artifact
+          name: devenv
+
+      - name: Install devenv.sh
+        shell: bash
+        run: nix profile add nixpkgs#devenv
+
+      - name: Run tests
+        run: cargo test --verbose --all-features
+
+      - name: Create package for attestation
+        run: cargo package --all-features
+
+      - name: Generate SBOMs
+        run: cargo cyclonedx --all-features -f xml && cargo cyclonedx --all-features -f json
+
+      - name: Scan SBOMs
+        uses: anchore/scan-action@v7
+        with:
+          sbom: ${{ github.workspace }}/hashstr/hashstr.cdx.json
+
+      - name: Upload artifacts for Github release
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-artifacts
+          retention-days: 1
+          if-no-files-found: error
           path: |
-            CHANGELOG.md
+            ${{ github.workspace }}/target/packages/*.crate
+            ${{ github.workspace }}/CHANGELOG.md
+            ${{ github.workspace }}/*/*.cdx.xml
+            ${{ github.workspace }}/*/*.cdx.json
+
+  crates-io-release:
+    name: Create crates.io release
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      id-token: write
+    defaults:
+      run:
+        shell: devenv shell bash -- -e {0}
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v6
+
+    - name: Install Nix
+      uses: cachix/install-nix-action@v31
+
+    - name: Setup Cachix
+      uses: cachix/cachix-action@v16
+      with:
+        name: devenv
+
+    - name: Install devenv.sh
+      shell: bash
+      run: nix profile add nixpkgs#devenv
+
+    - name: Obtain trusted publishing key
+      id: auth
+      uses: rust-lang/crates-io-auth-action@v1
+
+    - name: Publish release to crates.io
+      run: cargo publish -n
+      env:
+        CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
 
   github-release:
-    needs: crates-publish
-    runs-on: ubuntu-latest
     name: Create Github release
+    needs: crates-io-release
+    runs-on: ubuntu-latest
+    environment: release
     permissions:
       contents: write
+      id-token: write
     steps:
-      - name: Retrieve built package
-        uses: actions/download-artifact@v4
+      - name: Retrieve artifacts
+        uses: actions/download-artifact@v7
         with:
-          name: build-artifact
+          path: ${{ github.workspace }}/release-artifacts
+          name: release-artifacts
 
       - name: Extract changelog to body file
         run: |
-          awk '/^## ${{ github.ref_name }}/ {flag=1; next} /^- - -/ {flag=0} flag' CHANGELOG.md > release_body.md
+          awk '/^## ${{ github.ref_name }} -/ {flag=1; next} /^- - -/ {flag=0} flag' CHANGELOG.md > ${{ github.workspace }}/release_body.md
+
+      - name: Attest release
+        id: attest
+        uses: actions/attest@v4
+        with:
+          subject-path: ${{ github.workspace }}/release-artifacts/*.crate
+          sbom-path: ${{ github.workspace }}/release-artifacts/*.cdx.json
 
       - name: Create release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
-          body_path: release_body.md
+          body_path: ${{ github.workspace }}/release_body.md
           files: |
-            CHANGELOG.md
+            ${{ steps.attest.outputs.bundle-path }}
+            ${{ github.workspace }}/release-artifacts/*

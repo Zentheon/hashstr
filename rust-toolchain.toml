@@ -7,5 +7,6 @@ components = [
   "clippy",
   "rustfmt",
   "rust-analyzer",
+  "miri",
   "llvm-tools-preview",
 ]

@@ -4,6 +4,7 @@
   packages = [
     pkgs.cocogitto
     pkgs.cargo-llvm-cov
+    pkgs.cargo-cyclonedx
   ];
 
   languages.rust = {
@@ -17,6 +18,7 @@
       "clippy"
       "rustfmt"
       "rust-analyzer"
+      "miri"
       "llvm-tools-preview"
     ];
 
