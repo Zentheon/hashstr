@@ -3,7 +3,7 @@
 [package]
 name = "hashstr-derive"
 description = "Derive macro magic behind the hashstr crate"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2024"
 authors = ["Zentheon <zentheon@mailbox.org>"]
 readme = "./README.md"

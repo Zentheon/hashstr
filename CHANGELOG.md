@@ -2,6 +2,51 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## 0.3.0 - 2026-05-19
+
+#### Bug Fixes
+- 28b341c436b04373c5bf9186f23b46b896808fdb - remove non-trait `from_str` method, add `from_bytes` - @Zentheon
+
+- e1b8b08f07b2f35236718fe5733fa287ff080d6e - casing conversions now return an FStr instead of String - @Zentheon
+
+#### Continuous Integration
+- bb1418fe3c6566af9944aeb04fa5d036a7604aa5 - **(release)** more release testing - @Zentheon
+- f0943d98670ee670ae65abd3710a460a3de46d35 - **(release)** testing release workflow - @Zentheon
+- 437035ac6a00ce9b992bafb89d735b3608930e0d - **(release)** expand release.yml with SBOM and attestation - @Zentheon
+- dd04f212ba5316ad9d73c1238ef0dae38c548dcf - **(release)** rename `publish.yml` to `release.yml` and switch to trusted publishing - @Zentheon
+#### Documentation
+- 4944f9a97482d0c3919dc7be4ff05cc8b7fc8129 - **(sha3)** remove unnecessary `include_str!` - @Zentheon
+#### Features
+- b3bcfd68a34c798bf8b0f4d1e8bac827dade56e8 - no-std compatibility - @Zentheon
+
+- 9781632381fa7bd9dbeafb1146f6df3eff4f3069 - add From impls between variants - @Zentheon
+
+#### Miscellaneous Chores
+- 54a96d6868350067a162bd869723d985993bf2f9 - **(cog)** improve Cargo.toml bumping mechanism - @Zentheon
+- 7a6ad55caa2fbc39edfcee7f364d12b5402ab187 - **(deps)** update `sha3` to 0.12.0 - @Zentheon
+- ada3b338587d9572466f353569ce8b4ac3e034ef - **(deps)** update `fstr` to 0.2.20 and update usage - @Zentheon
+- fd220ef385f6261291168d377db258a7916b907e - **(deps)** cargo update - @Zentheon
+- 9d647e179e7cdc0fac8c1f4db3bfc868674d15f5 - **(deps)** use published `hashstr-derive` - @Zentheon
+- c8b5ba9d5cdd54f14b4690a29d29e3211ec75bf0 - **(nix)** devenv update - @Zentheon
+- 4cae74ce233afd352371a22f60974ce402572a07 - remove unused code and allow linker warnings in `hashstr-derive` - @Zentheon
+
+- 70b028d93c59c6add205640179fd8137dde86e7d - remove redundant `license-file` field in Cargo.toml - @Zentheon
+
+- fb89eebdc0499d41c467c90dec2a9c4ba4a67d7b - criterion & project update stuff - @Zentheon
+
+#### Refactoring
+- 91eadcc87311858a70e831e095187d7fc509c89e - **(rename)** rename "slice" methods to "array" & `from_inner_unchecked` -> `from_array_unchecked` - @Zentheon
+- 5afb467552d57a83994da479edaf28e0575e302a - rename all structs: `*Str` -> `*Hex` - @Zentheon
+
+- 871f0d00c550262cf52b58baf58186bd2f3404d3 - switch from `const_hex` to `base16ct` - @Zentheon
+
+- 662d11054041795fa48471478ccb05ecd5d58185 - rename some methods - @Zentheon
+
+- 8bbc3552287268f7b397227b1a90a50b0c7fda42 - lay groundwork for base64 variants - @Zentheon
+
+
+- - -
+
 ## 0.2.0 - 2026-05-04
 
 #### Documentation
