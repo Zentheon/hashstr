@@ -21,7 +21,7 @@ use hashstr_derive::{HashStrDigest, HashStrWrapper, impl_hashstr_tests};
         let hash = Self::from(hasher.finalize());
     ",
 )]
-pub struct Blake3Str(fstr::FStr<64>);
+pub struct Blake3Hex(fstr::FStr<64>);
 
 #[derive(Clone, Debug, Eq, HashStrWrapper, HashStrDigest)]
 #[hashstr(hasher = blake3::Hash, con = U32, hash_name = "Blake3", encoding = "upper_hex",
@@ -42,14 +42,14 @@ pub struct Blake3Str(fstr::FStr<64>);
         let hash = Self::from(hasher.finalize());
     ",
 )]
-pub struct Blake3StrUpper(fstr::FStr<64>);
+pub struct Blake3HexUpper(fstr::FStr<64>);
 
-impl From<Hash> for Blake3Str {
+impl From<Hash> for Blake3Hex {
     fn from(value: Hash) -> Self {
         Self(fstr::FStr::try_from(value.to_hex().as_bytes()).unwrap())
     }
 }
-impl From<Hash> for Blake3StrUpper {
+impl From<Hash> for Blake3HexUpper {
     fn from(value: Hash) -> Self {
         Self(crate::convert_hex_case_fstr::<64, true>(
             &fstr::FStr::try_from(value.to_hex().as_bytes()).unwrap(),

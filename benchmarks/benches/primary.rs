@@ -2,7 +2,7 @@
 
 use std::{hint::black_box, random::random};
 
-use hashstr::sha3::Sha3_512Str;
+use hashstr::sha3::Sha3_512Hex;
 use sha3::{Digest, Sha3_512};
 
 use criterion::{BenchmarkId, Criterion, Throughput, criterion_group, criterion_main};
@@ -31,7 +31,7 @@ fn encode_digest_hex(c: &mut Criterion) {
             BenchmarkId::from_parameter(format!("{bytes:?}")),
             &data,
             |bench, &data| {
-                bench.iter(|| black_box(Sha3_512Str::encode(black_box(&data))).unwrap());
+                bench.iter(|| black_box(Sha3_512Hex::encode(black_box(&data))).unwrap());
             },
         );
     }

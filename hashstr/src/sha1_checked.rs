@@ -144,14 +144,14 @@ impl<T> CollisionResult<T> {
 
 #[derive(Debug, Clone, Eq, HashStrWrapper)]
 #[hashstr(hash_name = "Sha1Checked", con = U20)]
-pub struct Sha1CheckedStr(FStr<{ U20::USIZE * 2 }>);
+pub struct Sha1CheckedHex(FStr<{ U20::USIZE * 2 }>);
 
-impl_sha1_checked!(Sha1CheckedStr);
+impl_sha1_checked!(Sha1CheckedHex);
 
 #[derive(Debug, Clone, Eq, HashStrWrapper)]
 #[hashstr(hash_name = "Sha1Checked", con = U20, encoding = "upper_hex")]
-pub struct Sha1CheckedStrUpper(FStr<{ U20::USIZE * 2 }>);
+pub struct Sha1CheckedHexUpper(FStr<{ U20::USIZE * 2 }>);
 
-impl_sha1_checked!(Sha1CheckedStrUpper);
+impl_sha1_checked!(Sha1CheckedHexUpper);
 
 impl_hashstr_tests!(hasher = Sha1, hash_name = "Sha1Checked", con = U20,);

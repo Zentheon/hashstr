@@ -171,8 +171,8 @@ impl Args {
     pub fn struct_ident(&self, encoding: EncodingType) -> Ident {
         let base = self.hash_name_str().value();
         match encoding {
-            EncodingType::LowerHex => ident!("{base}Str"),
-            EncodingType::UpperHex => ident!("{base}StrUpper"),
+            EncodingType::LowerHex => ident!("{base}Hex"),
+            EncodingType::UpperHex => ident!("{base}HexUpper"),
             EncodingType::Base64 => ident!("{base}Base64"),
         }
     }
@@ -180,8 +180,8 @@ impl Args {
     pub fn struct_snake(&self, encoding: EncodingType) -> Ident {
         let base = self.hash_name_str().value().to_lowercase();
         match encoding {
-            EncodingType::LowerHex => ident!("{base}_str_upper"),
-            EncodingType::UpperHex => ident!("{base}_str"),
+            EncodingType::LowerHex => ident!("{base}_hex_upper"),
+            EncodingType::UpperHex => ident!("{base}_hex"),
             EncodingType::Base64 => ident!("{base}_base64"),
         }
     }
