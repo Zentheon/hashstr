@@ -57,7 +57,7 @@ jobs:
           sbom: ${{ github.workspace }}/hashstr/hashstr.cdx.json
 
       - name: Upload artifacts for Github release
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v7
         with:
           name: release-artifacts
           retention-days: 1
@@ -132,7 +132,7 @@ jobs:
           sbom-path: ${{ github.workspace }}/release-artifacts/*.cdx.json
 
       - name: Create release
-        uses: softprops/action-gh-release@v7
+        uses: softprops/action-gh-release@v3
         with:
           draft: true # remove this line if nothing explodes
           body_path: ${{ github.workspace }}/release_body.md
