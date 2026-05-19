@@ -4,13 +4,13 @@ name: Build, test and publish release
 
 # This workflow contains three jobs, each a dependent of the next:
 # build-and-test:
-#   Build and test packages, generate SBOMs, attest and upload relevant artifacts
+#   Build and test packages, generate SBOMs and upload relevant artifacts
 #
 # crates-io-release:
 #   Publish the release to crates.io
 #
 # github-release:
-#   Retrieves the `release-artifact` from `build-and-test` and creates a release with those files
+#   Retrieves the `release-artifacts` from `build-and-test`, attests and creates a release with those files
 
 on:
   push:
@@ -59,7 +59,7 @@ jobs:
           sbom: ${{ github.workspace }}/hashstr/hashstr.cdx.json
 
       - name: Upload artifacts for Github release
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v3
         with:
           name: release-artifacts
           retention-days: 1
@@ -116,7 +116,7 @@ jobs:
       id-token: write
     steps:
       - name: Retrieve artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v3
         with:
           path: ${{ github.workspace }}/release-artifacts
           name: release-artifacts
