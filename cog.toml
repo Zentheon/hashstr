@@ -9,6 +9,7 @@ branch_whitelist = []
 skip_ci = "[skip ci]"
 skip_untracked = false
 pre_bump_hooks = [
+    "echo '{{version}}' '{{from}}' '{{version+major}}' '{{version}}+minor' '{{version}}+{{minor}}'",
     "cargo test --all-features",
     "bump-crate {{version}} */Cargo.toml",
     "bump-dep hashstr {{version}} */Cargo.toml",
