@@ -26,7 +26,7 @@ post_package_bump_hooks = []
 
 [changelog]
 path = "CHANGELOG.md"
-template = "./changelog-template"
+template = "./.dev/changelog-template.tera"
 authors = [
     { username = "Zentheon", signature = "Zentheon" }
 ]

@@ -9,4 +9,5 @@ components = [
   "rust-analyzer",
   "miri",
   "llvm-tools-preview",
+  "rustc-codegen-cranelift-preview",
 ]

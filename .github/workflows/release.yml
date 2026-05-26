@@ -23,7 +23,7 @@ jobs:
       environment: release
       defaults:
         run:
-          shell: devenv shell bash -- -e {0}
+          shell: nix develop .#ci -c bash -e -- {0}
 
       steps:
       - name: Checkout repository
@@ -31,15 +31,6 @@ jobs:
 
       - name: Install Nix
         uses: cachix/install-nix-action@v31
-
-      - name: Setup Cachix
-        uses: cachix/cachix-action@v16
-        with:
-          name: devenv
-
-      - name: Install devenv.sh
-        shell: bash
-        run: nix profile add nixpkgs#devenv
 
       - name: Run tests
         run: cargo test --verbose --all-features
@@ -77,7 +68,7 @@ jobs:
       id-token: write
     defaults:
       run:
-        shell: devenv shell bash -- -e {0}
+        shell: nix develop .#ci -c bash -e -- {0}
 
     steps:
     - name: Checkout repository
@@ -85,15 +76,6 @@ jobs:
 
     - name: Install Nix
       uses: cachix/install-nix-action@v31
-
-    - name: Setup Cachix
-      uses: cachix/cachix-action@v16
-      with:
-        name: devenv
-
-    - name: Install devenv.sh
-      shell: bash
-      run: nix profile add nixpkgs#devenv
 
     - name: Obtain trusted publishing key
       id: auth
