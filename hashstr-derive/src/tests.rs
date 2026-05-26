@@ -314,6 +314,8 @@ pub fn generate_tests(args: &Args) -> proc_macro2::TokenStream {
     quote! {
         #[cfg(test)]
         #[cfg(feature = "std")]
+        #[allow(clippy::char_lit_as_u8)]
+        #[allow(clippy::cmp_owned)]
         mod #mod_ident {
             use super::*;
             use digest::typenum::Unsigned;
@@ -325,5 +327,4 @@ pub fn generate_tests(args: &Args) -> proc_macro2::TokenStream {
             #tests_stream
         }
     }
-    .into()
 }

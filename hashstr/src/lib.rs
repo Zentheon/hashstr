@@ -135,7 +135,7 @@ mod tests {
         info!("hex3: {hex3}");
         info!("hex array: {:?}", hex3.as_bytes().as_array::<12>().unwrap());
 
-        let lower_array = convert_hex_case::<12, true>(&hex3.as_bytes());
+        let lower_array = convert_hex_case::<12, true>(hex3.as_bytes());
         let lower1 = convert_hex_case_fstr::<6, false>(&hex1);
         let upper1 = convert_hex_case_fstr::<6, true>(&hex1);
 
@@ -202,9 +202,9 @@ pub fn decode_hex<const N: usize, const UPPER: bool>(
         base16ct::lower::decode(&value, &mut decoded)
     } {
         Ok(_) => Ok(()),
-        Err(base16ct::Error::InvalidEncoding) => Err(Error::EncodingError(crate::EncodingError {
-            hash_name: hash_name,
-        })),
+        Err(base16ct::Error::InvalidEncoding) => {
+            Err(Error::EncodingError(crate::EncodingError { hash_name }))
+        }
         Err(base16ct::Error::InvalidLength) => Err(Error::LengthError(LengthError {
             expected: N,
             actual: value.as_ref().len(),

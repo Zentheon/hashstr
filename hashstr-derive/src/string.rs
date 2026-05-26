@@ -54,6 +54,9 @@ impl StrWrapperRec {
                 pub const fn len(&self) -> usize {
                     self.as_bytes().len()
                 }
+                pub const fn is_empty(&self) -> bool {
+                    self.as_bytes().is_empty()
+                }
                 pub const fn as_str(&self) -> &str {
                     self.0.as_str()
                 }

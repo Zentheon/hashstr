@@ -8,11 +8,7 @@ use sha3::{Digest, Sha3_512};
 use criterion::{BenchmarkId, Criterion, Throughput, criterion_group, criterion_main};
 
 fn random_bytes_array<const N: usize>() -> [u8; N] {
-    let mut array = [0u8; N];
-    for i in 0..N {
-        array[i] = random(..);
-    }
-    array
+    [random(..); N]
 }
 
 fn digest_bytes(bytes: &[u8]) -> [u8; 64] {
