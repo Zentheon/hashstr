@@ -83,5 +83,5 @@ base32ct = "0.3.1"
 serde = { version = "1.0.228", default-features = false }
 
 [dev-dependencies]
-const-hex = "1.18.1"
+const-hex = "1.19.1"
 tracing-test = "0.2.6"
