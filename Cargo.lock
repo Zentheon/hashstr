@@ -501,9 +501,9 @@ dependencies = [
 
 [[package]]
 name = "fstr"
-version = "0.2.21"
+version = "0.2.22"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b3b8f793a77bb6d48059953a3e9820fd860d19a9bed8164ed3572eb1981ec8aa"
+checksum = "77aa17007d293bae1a2acfa15f733c58c7b9984714515ab4515727fc5b722396"
 dependencies = [
  "serde",
 ]
